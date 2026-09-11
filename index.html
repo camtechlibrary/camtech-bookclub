@@ -51,7 +51,6 @@
         
         .meta-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #4A443C; margin-bottom: 8px; }
         .meta-item:last-child { margin-bottom: 0; }
-        .meta-icon { width: 14px; height: 14px; opacity: 0.7; }
 
         /* Form Controls */
         .section-heading { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; color: #1B4332; margin-bottom: 4px; }
@@ -60,13 +59,19 @@
         .btn { 
             width: 100%; padding: 13px 16px; border-radius: 10px; border: 1px solid transparent; 
             font-size: 14px; font-weight: 600; cursor: pointer; text-align: left; 
-            margin-bottom: 10px; transition: all 0.2s ease; display: flex; align-items: center;
+            margin-bottom: 10px; transition: all 0.2s ease;
         }
         .btn-attend { background: #1B4332; color: #FFFFFF; }
         .btn-cant { background: #F7EFE8; color: #5D4037; border-color: #E8DCD1; }
         .btn-unsure { background: #FFFBEA; color: #856404; border-color: #F5EBA6; }
         
-        .form-group { margin-top: 20px; }
+        .user-pill {
+            background: #EAE3D9; color: #1B4332; padding: 6px 12px; 
+            border-radius: 20px; font-size: 12px; font-weight: 600; 
+            display: inline-block; margin-bottom: 12px;
+        }
+
+        .form-group { margin-top: 16px; }
         label { font-size: 10px; font-weight: 700; color: #8C8275; letter-spacing: 0.6px; display: block; margin-bottom: 6px; text-transform: uppercase; }
         select { 
             width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #DCD4C8; 
@@ -92,7 +97,6 @@
 <body>
 
     <div class="container" id="app">
-        <!-- Form View -->
         <div class="brand-header">
             <div class="brand-logo">C</div>
             <div class="brand-title">CamTech Library Book Club</div>
@@ -105,19 +109,12 @@
             <div class="book-title">"The Library of Babel & Other Stories"</div>
             <div class="book-author">by Jorge Luis Borges</div>
 
-            <div class="meta-item">
-                <span class="meta-icon">📅</span>
-                <span>Friday, October 24, 2025</span>
-            </div>
-            <div class="meta-item">
-                <span class="meta-icon">🕒</span>
-                <span>3:30 PM - 5:00 PM</span>
-            </div>
-            <div class="meta-item">
-                <span class="meta-icon">📍</span>
-                <span>CamTech Library Reading Lobby</span>
-            </div>
+            <div class="meta-item">📅 <span>Friday, October 24, 2025</span></div>
+            <div class="meta-item">🕒 <span>3:30 PM - 5:00 PM</span></div>
+            <div class="meta-item">📍 <span>CamTech Library Reading Lobby</span></div>
         </div>
+
+        <div id="userInfo"></div>
 
         <div class="section-heading">Will you join us this Friday?</div>
         <div class="section-subtext">Please confirm your participation. It only takes one click.</div>
@@ -126,37 +123,47 @@
         <button class="btn btn-cant" onclick="submitRSVP('Can\'t Attend')">◯ I Can't Attend</button>
         <button class="btn btn-unsure" onclick="submitRSVP('Not Sure Yet')">? Not Sure Yet</button>
 
-        <div class="form-group">
-            <label for="memberName">NAME</label>
+        <div id="fallbackSelect" class="form-group" style="display: none;">
+            <label for="memberName">NAME (Browser Test Mode)</label>
             <select id="memberName">
-                <option value="">Select your name</option>
                 <option value="Dr. Elizabeth Vance">Dr. Elizabeth Vance</option>
                 <option value="Julian Archer">Julian Archer</option>
                 <option value="Miriam Sterling">Miriam Sterling</option>
                 <option value="Arthur Pendelton">Arthur Pendelton</option>
-                <option value="Prof. Henry Higgins">Prof. Henry Higgins</option>
-                <option value="Beatrice Thorne">Beatrice Thorne</option>
-                <option value="Charles Darwin">Charles Darwin</option>
             </select>
         </div>
 
-        <div class="footer-note">Your response is recorded anonymously for library planning.</div>
+        <div class="footer-note">Your response is recorded automatically for library planning.</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        function submitRSVP(status) {
-            const selectEl = document.getElementById('memberName');
-            const selectedName = selectEl.value;
+        let activeUser = "";
 
-            if (!selectedName) {
-                alert('Please select your name from the dropdown menu first.');
-                return;
+        // Detect if opened inside Telegram
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            const u = tg.initDataUnsafe.user;
+            activeUser = `${u.first_name || ''} ${u.last_name || ''}`.trim();
+            document.getElementById('userInfo').innerHTML = `<div class="user-pill">👤 Member: ${activeUser}</div>`;
+        } else {
+            // Show fallback dropdown if opened in regular browser
+            document.getElementById('fallbackSelect').style.display = 'block';
+        }
+
+        function submitRSVP(status) {
+            if (!activeUser) {
+                const selectEl = document.getElementById('memberName');
+                activeUser = selectEl.value;
             }
 
-            // Render Screen 2 (Success Screen)
+            // Send data back to Telegram Bot backend if needed
+            if (tg.sendData) {
+                tg.sendData(JSON.stringify({ user: activeUser, status: status }));
+            }
+
+            // Render Success Screen
             document.getElementById('app').innerHTML = `
                 <div class="brand-header">
                     <div class="brand-logo">C</div>
@@ -167,7 +174,7 @@
 
                 <div class="event-card success-box">
                     <div class="check-circle">✓</div>
-                    <h2 style="font-family: 'Playfair Display', serif; font-size: 20px; color: #1B4332; margin-bottom: 6px;">Thank you!</h2>
+                    <h2 style="font-family: 'Playfair Display', serif; font-size: 20px; color: #1B4332; margin-bottom: 6px;">Thank you, ${activeUser}!</h2>
                     <p style="font-size: 12px; color: #70685C;">Your response has been recorded</p>
                     <div style="margin-top: 14px;">
                         <span class="response-badge">Your response: ${status}</span>
