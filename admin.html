@@ -167,19 +167,19 @@
             <div class="metrics-grid">
                 <div class="metric-card confirmed">
                     <div class="metric-label">Confirmed</div>
-                    <div class="metric-value" id="countAttend">4</div>
+                    <div class="metric-value" id="countAttend">0</div>
                 </div>
                 <div class="metric-card cant">
                     <div class="metric-label">Unable to Attend</div>
-                    <div class="metric-value" id="countCant">1</div>
+                    <div class="metric-value" id="countCant">0</div>
                 </div>
                 <div class="metric-card unsure">
                     <div class="metric-label">Not Sure</div>
-                    <div class="metric-value" id="countUnsure">1</div>
+                    <div class="metric-value" id="countUnsure">0</div>
                 </div>
                 <div class="metric-card no-response">
-                    <div class="metric-label">No Response</div>
-                    <div class="metric-value" id="countNone">1</div>
+                    <div class="metric-label">Total Votes</div>
+                    <div class="metric-value" id="countTotal">0</div>
                 </div>
             </div>
         </div>
@@ -219,46 +219,9 @@
                         </thead>
                         <tbody id="attendanceTable">
                             <tr>
-                                <td><strong>Dr. Elizabeth Vance</strong></td>
-                                <td>Moderator</td>
-                                <td><span class="badge badge-attend">✓ I'll Attend</span></td>
-                                <td>Oct 22, 10:14 AM</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Julian Archer</strong></td>
-                                <td>Lead Reader</td>
-                                <td><span class="badge badge-attend">✓ I'll Attend</span></td>
-                                <td>Oct 22, 11:30 AM</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Miriam Sterling</strong></td>
-                                <td>Lead Reader</td>
-                                <td><span class="badge badge-unsure">? Not Sure</span></td>
-                                <td>Oct 23, 08:45 AM</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Arthur Pendelton</strong></td>
-                                <td>Member</td>
-                                <td><span class="badge badge-attend">✓ I'll Attend</span></td>
-                                <td>Oct 23, 02:15 PM</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Prof. Henry Higgins</strong></td>
-                                <td>Member</td>
-                                <td><span class="badge badge-cant">◯ I Can't Attend</span></td>
-                                <td>Oct 23, 09:12 AM</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Beatrice Thorne</strong></td>
-                                <td>Member</td>
-                                <td><span class="badge badge-attend">✓ I'll Attend</span></td>
-                                <td>Oct 24, 11:02 AM</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Charles Darwin</strong></td>
-                                <td>Member</td>
-                                <td><span class="badge badge-none">— No Response</span></td>
-                                <td>—</td>
+                                <td colspan="4" style="text-align: center; color: #8C8275; padding: 24px;">
+                                    Loading live dashboard data...
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -266,7 +229,7 @@
 
                 <!-- Export & Action Buttons -->
                 <div class="actions-footer">
-                    <button class="btn-action btn-primary" onclick="window.print()">Export Report</button>
+                    <button class="btn-action btn-primary" onclick="loadLiveVotes()">Refresh Data</button>
                     <button class="btn-action btn-secondary" onclick="exportCSV()">Download CSV</button>
                     <button class="btn-action btn-secondary" onclick="window.print()">Print Attendance Record</button>
                 </div>
@@ -275,6 +238,65 @@
     </div>
 
     <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhMUC54uxlLZENauUL9CA2QdrHriUS5gFOc27189tZszWR3kWIH7uSe5aOtd4QB_Zi/exec";
+
+        async function loadLiveVotes() {
+            const tableBody = document.getElementById('attendanceTable');
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const rows = await response.json();
+
+                if (!rows || rows.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#8C8275; padding:24px;">No votes recorded yet.</td></tr>`;
+                    document.getElementById('countAttend').innerText = '0';
+                    document.getElementById('countCant').innerText = '0';
+                    document.getElementById('countUnsure').innerText = '0';
+                    document.getElementById('countTotal').innerText = '0';
+                    return;
+                }
+
+                tableBody.innerHTML = '';
+                let attend = 0, cant = 0, unsure = 0;
+
+                rows.forEach(item => {
+                    const user = item.user || item[1] || 'Member';
+                    const status = item.status || item[2] || '—';
+                    const rawTime = item.timestamp || item[0];
+                    const formattedTime = rawTime ? new Date(rawTime).toLocaleString() : '—';
+
+                    let badgeClass = 'badge-none';
+                    if (status === "I'll Attend") {
+                        badgeClass = 'badge-attend';
+                        attend++;
+                    } else if (status === "Can't Attend") {
+                        badgeClass = 'badge-cant';
+                        cant++;
+                    } else if (status === "Not Sure Yet" || status === "? Not Sure") {
+                        badgeClass = 'badge-unsure';
+                        unsure++;
+                    }
+
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td><strong>${user}</strong></td>
+                            <td>Member</td>
+                            <td><span class="badge ${badgeClass}">${status}</span></td>
+                            <td>${formattedTime}</td>
+                        </tr>
+                    `;
+                });
+
+                document.getElementById('countAttend').innerText = attend;
+                document.getElementById('countCant').innerText = cant;
+                document.getElementById('countUnsure').innerText = unsure;
+                document.getElementById('countTotal').innerText = rows.length;
+
+            } catch (err) {
+                console.error("Error fetching live data:", err);
+                tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#C62828; padding:24px;">Error loading live votes. Please refresh.</td></tr>`;
+            }
+        }
+
         // CSV Download Function
         function exportCSV() {
             let csv = 'Participant,Role,Response,Response Time\n';
@@ -282,8 +304,10 @@
             
             rows.forEach(row => {
                 const cols = row.querySelectorAll("td");
-                const rowData = Array.from(cols).map(c => `"${c.innerText.trim()}"`).join(",");
-                csv += rowData + "\n";
+                if (cols.length > 1) {
+                    const rowData = Array.from(cols).map(c => `"${c.innerText.trim()}"`).join(",");
+                    csv += rowData + "\n";
+                }
             });
 
             const blob = new Blob([csv], { type: 'text/csv' });
@@ -293,6 +317,9 @@
             a.setAttribute('download', 'CamTech_BookClub_Attendance.csv');
             a.click();
         }
+
+        // Automatically fetch live votes on page load
+        loadLiveVotes();
     </script>
 </body>
 </html>
