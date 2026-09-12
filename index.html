@@ -26,7 +26,6 @@
             border: 1px solid #EAE3D9;
         }
         
-        /* Header */
         .brand-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
         .brand-logo { 
             width: 24px; height: 24px; background: #1B4332; color: #FFF; 
@@ -36,7 +35,6 @@
         .brand-title { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; color: #556B2F; text-transform: uppercase; }
         .page-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: #1B4332; margin-bottom: 20px; }
 
-        /* Event Card */
         .event-card { 
             background: #FFFFFF; 
             border-radius: 14px; 
@@ -52,7 +50,6 @@
         .meta-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #4A443C; margin-bottom: 8px; }
         .meta-item:last-child { margin-bottom: 0; }
 
-        /* Form Controls */
         .section-heading { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; color: #1B4332; margin-bottom: 4px; }
         .section-subtext { font-size: 12px; color: #70685C; margin-bottom: 16px; }
         
@@ -71,7 +68,7 @@
             display: inline-block; margin-bottom: 12px;
         }
 
-        .form-group { margin-top: 16px; }
+        .form-group { margin-bottom: 16px; }
         label { font-size: 10px; font-weight: 700; color: #8C8275; letter-spacing: 0.6px; display: block; margin-bottom: 6px; text-transform: uppercase; }
         select { 
             width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #DCD4C8; 
@@ -79,7 +76,6 @@
         }
         .footer-note { font-size: 10px; color: #9E9486; text-align: center; margin-top: 20px; }
 
-        /* Success State */
         .success-box { text-align: center; padding: 20px 10px; }
         .check-circle { 
             width: 48px; height: 48px; background: #E8F5E9; color: #2E7D32; 
@@ -104,26 +100,35 @@
         
         <h1 class="page-title">Weekly Reading & Discussion</h1>
 
+        <div class="form-group">
+            <label for="meetingWeek">SELECT MEETING WEEK</label>
+            <select id="meetingWeek">
+                <option value="Friday, October 24, 2025">Week 1: Friday, Oct 24, 2025</option>
+                <option value="Friday, October 31, 2025">Week 2: Friday, Oct 31, 2025</option>
+                <option value="Friday, November 07, 2025">Week 3: Friday, Nov 07, 2025</option>
+            </select>
+        </div>
+
         <div class="event-card">
             <div class="card-label">Currently Reading</div>
             <div class="book-title">"The Library of Babel & Other Stories"</div>
             <div class="book-author">by Jorge Luis Borges</div>
 
-            <div class="meta-item">📅 <span>Friday, October 24, 2025</span></div>
+            <div class="meta-item">📅 <span id="displayDate">Friday, October 24, 2025</span></div>
             <div class="meta-item">🕒 <span>3:30 PM - 5:00 PM</span></div>
             <div class="meta-item">📍 <span>CamTech Library Reading Lobby</span></div>
         </div>
 
         <div id="userInfo"></div>
 
-        <div class="section-heading">Will you join us this Friday?</div>
+        <div class="section-heading">Will you join us?</div>
         <div class="section-subtext">Please confirm your participation. It only takes one click.</div>
 
         <button class="btn btn-attend" onclick="submitRSVP('I\'ll Attend')">✓ I'll Attend</button>
         <button class="btn btn-cant" onclick="submitRSVP('Can\'t Attend')">◯ I Can't Attend</button>
         <button class="btn btn-unsure" onclick="submitRSVP('Not Sure Yet')">? Not Sure Yet</button>
 
-        <div id="fallbackSelect" class="form-group" style="display: none;">
+        <div id="fallbackSelect" class="form-group" style="display: none; margin-top: 14px;">
             <label for="memberName">NAME (Browser Test Mode)</label>
             <select id="memberName">
                 <option value="Dr. Elizabeth Vance">Dr. Elizabeth Vance</option>
@@ -144,15 +149,17 @@
 
         let activeUser = "";
 
-        // Detect if opened inside Telegram
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             const u = tg.initDataUnsafe.user;
             activeUser = `${u.first_name || ''} ${u.last_name || ''}`.trim();
             document.getElementById('userInfo').innerHTML = `<div class="user-pill">👤 Member: ${activeUser}</div>`;
         } else {
-            // Show fallback dropdown if opened in regular browser
             document.getElementById('fallbackSelect').style.display = 'block';
         }
+
+        document.getElementById('meetingWeek').addEventListener('change', (e) => {
+            document.getElementById('displayDate').innerText = e.target.value;
+        });
 
         function submitRSVP(status) {
             if (!activeUser) {
@@ -160,20 +167,19 @@
                 activeUser = selectEl ? selectEl.value : "Member";
             }
 
-            // Send live response to Google Sheet database
+            const meetingDate = document.getElementById('meetingWeek').value;
+
             fetch(SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user: activeUser, status: status })
+                body: JSON.stringify({ user: activeUser, status: status, meetingDate: meetingDate })
             });
 
-            // Send data back to Telegram Bot backend if needed
             if (tg.sendData) {
-                tg.sendData(JSON.stringify({ user: activeUser, status: status }));
+                tg.sendData(JSON.stringify({ user: activeUser, status: status, meetingDate: meetingDate }));
             }
 
-            // Render Success Screen
             document.getElementById('app').innerHTML = `
                 <div class="brand-header">
                     <div class="brand-logo">C</div>
@@ -185,20 +191,10 @@
                 <div class="event-card success-box">
                     <div class="check-circle">✓</div>
                     <h2 style="font-family: 'Playfair Display', serif; font-size: 20px; color: #1B4332; margin-bottom: 6px;">Thank you, ${activeUser}!</h2>
-                    <p style="font-size: 12px; color: #70685C;">Your response has been recorded</p>
+                    <p style="font-size: 12px; color: #70685C;">Your response for ${meetingDate} has been recorded</p>
                     <div style="margin-top: 14px;">
                         <span class="response-badge">Your response: ${status}</span>
                     </div>
-                </div>
-
-                <div class="event-card">
-                    <div class="card-label">Currently Reading</div>
-                    <div class="book-title">"The Library of Babel & Other Stories"</div>
-                    <div class="book-author">by Jorge Luis Borges</div>
-
-                    <div class="meta-item">📅 <span>Friday, October 24, 2025</span></div>
-                    <div class="meta-item">🕒 <span>3:30 PM - 5:00 PM</span></div>
-                    <div class="meta-item">📍 <span>CamTech Library Reading Lobby</span></div>
                 </div>
 
                 <div class="quote-footer">"See you at the Book Club!"</div>
