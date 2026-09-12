@@ -13,7 +13,6 @@
             color: #2C3E50; 
         }
 
-        /* Top Bar */
         .top-navbar {
             background: #1B4332;
             color: #FFFFFF;
@@ -27,7 +26,6 @@
         .brand-icon { width: 22px; height: 22px; background: #FFF; color: #1B4332; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; }
         .nav-title { font-size: 12px; color: #D8F3DC; text-transform: uppercase; letter-spacing: 0.6px; }
 
-        /* Main Layout */
         .dashboard-container {
             max-width: 1200px;
             margin: 28px auto;
@@ -39,11 +37,32 @@
             justify-content: space-between;
             align-items: flex-end;
             margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
         }
         .page-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: #1B4332; }
         .page-subtext { font-size: 13px; color: #70685C; margin-top: 2px; }
 
-        /* Metric Cards */
+        .week-selector-card {
+            background: #FFFFFF;
+            border: 1px solid #EAE3D9;
+            padding: 10px 16px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .week-selector-card label { font-size: 11px; font-weight: 700; color: #8C8275; text-transform: uppercase; }
+        .week-selector-card select {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #DCD4C8;
+            font-size: 13px;
+            color: #1B4332;
+            font-weight: 600;
+            outline: none;
+        }
+
         .metrics-grid {
             display: flex;
             gap: 14px;
@@ -62,14 +81,12 @@
         .metric-label { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; }
         .metric-value { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin-top: 6px; }
 
-        /* Main Grid Content */
         .content-grid {
             display: grid;
-            grid-template-columns: 320px 1fr;
+            grid-template-columns: 300px 1fr;
             gap: 24px;
         }
 
-        /* Side Cards */
         .side-card {
             background: #FAF7F2;
             border-radius: 14px;
@@ -85,7 +102,6 @@
         .staff-role { font-size: 12px; color: #4A443C; margin-bottom: 6px; }
         .staff-role strong { color: #1B4332; }
 
-        /* Table Area */
         .table-card {
             background: #FFFFFF;
             border-radius: 14px;
@@ -104,10 +120,9 @@
             border-bottom: 1px solid #EAE3D9; 
             text-transform: uppercase;
         }
-        td { padding: 14px 18px; border-bottom: 1px solid #F2ECE4; color: #2C3E50; }
+        td { padding: 12px 18px; border-bottom: 1px solid #F2ECE4; color: #2C3E50; }
         tr:last-child td { border-bottom: none; }
 
-        /* Badges */
         .badge {
             display: inline-block;
             padding: 4px 10px;
@@ -120,7 +135,12 @@
         .badge-unsure { background: #FFF8E1; color: #B78103; }
         .badge-none { background: #ECEFF1; color: #546E7A; }
 
-        /* Buttons Footer */
+        .btn-btn-group { display: flex; gap: 6px; }
+        .btn-edit { background: #EAE3D9; color: #1B4332; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; }
+        .btn-delete { background: #FFEBEE; color: #C62828; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; }
+        .btn-edit:hover { background: #DCD4C8; }
+        .btn-delete:hover { background: #FFCDD2; }
+
         .actions-footer {
             margin-top: 24px;
             display: flex;
@@ -140,14 +160,13 @@
         .btn-action:hover { opacity: 0.9; }
 
         @media print {
-            .top-navbar, .actions-footer { display: none; }
+            .top-navbar, .actions-footer, .week-selector-card, .btn-btn-group { display: none; }
             body { background: #FFF; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Top Navigation Bar -->
     <div class="top-navbar">
         <div class="nav-brand">
             <div class="brand-icon">C</div>
@@ -157,11 +176,20 @@
     </div>
 
     <div class="dashboard-container">
-        <!-- Header & Summary Cards -->
         <div class="header-row">
             <div>
                 <h1 class="page-title">Book Club Attendance</h1>
-                <div class="page-subtext">Live status tracking and check-in metrics</div>
+                <div class="page-subtext">Live status tracking and weekly check-in management</div>
+            </div>
+
+            <div class="week-selector-card">
+                <label for="filterWeek">Filter Week:</label>
+                <select id="filterWeek" onchange="renderTable()">
+                    <option value="ALL">All Weeks</option>
+                    <option value="Friday, October 24, 2025" selected>Friday, Oct 24, 2025</option>
+                    <option value="Friday, October 31, 2025">Friday, Oct 31, 2025</option>
+                    <option value="Friday, November 07, 2025">Friday, Nov 07, 2025</option>
+                </select>
             </div>
 
             <div class="metrics-grid">
@@ -184,16 +212,14 @@
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="content-grid">
-            <!-- Left Info Panel -->
             <div>
                 <div class="side-card">
                     <div class="card-label">Currently Reading</div>
                     <div class="book-title">"The Library of Babel & Other Stories"</div>
                     <div class="book-author">by Jorge Luis Borges</div>
 
-                    <div class="meta-item">📅 <span>Friday, October 24, 2025</span></div>
+                    <div class="meta-item">📅 <span id="sideCardDate">Friday, October 24, 2025</span></div>
                     <div class="meta-item">🕒 <span>3:30 PM - 5:00 PM</span></div>
                     <div class="meta-item">📍 <span>CamTech Library Reading Lobby</span></div>
                 </div>
@@ -205,21 +231,21 @@
                 </div>
             </div>
 
-            <!-- Right Participants Table -->
             <div>
                 <div class="table-card">
                     <table>
                         <thead>
                             <tr>
                                 <th>Participant</th>
-                                <th>Role</th>
+                                <th>Meeting Week</th>
                                 <th>Response</th>
                                 <th>Response Time</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="attendanceTable">
                             <tr>
-                                <td colspan="4" style="text-align: center; color: #8C8275; padding: 24px;">
+                                <td colspan="5" style="text-align: center; color: #8C8275; padding: 24px;">
                                     Loading live dashboard data...
                                 </td>
                             </tr>
@@ -227,7 +253,6 @@
                     </table>
                 </div>
 
-                <!-- Export & Action Buttons -->
                 <div class="actions-footer">
                     <button class="btn-action btn-primary" onclick="loadLiveVotes()">Refresh Data</button>
                     <button class="btn-action btn-secondary" onclick="exportCSV()">Download CSV</button>
@@ -239,73 +264,125 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhMUC54uxlLZENauUL9CA2QdrHriUS5gFOc27189tZszWR3kWIH7uSe5aOtd4QB_Zi/exec";
+        let allVotes = [];
 
         async function loadLiveVotes() {
             const tableBody = document.getElementById('attendanceTable');
+            tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #8C8275; padding: 24px;">Fetching votes...</td></tr>`;
+
             try {
                 const response = await fetch(SCRIPT_URL);
-                const rows = await response.json();
-
-                if (!rows || rows.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#8C8275; padding:24px;">No votes recorded yet.</td></tr>`;
-                    document.getElementById('countAttend').innerText = '0';
-                    document.getElementById('countCant').innerText = '0';
-                    document.getElementById('countUnsure').innerText = '0';
-                    document.getElementById('countTotal').innerText = '0';
-                    return;
-                }
-
-                tableBody.innerHTML = '';
-                let attend = 0, cant = 0, unsure = 0;
-
-                rows.forEach(item => {
-                    const user = item.user || item[1] || 'Member';
-                    const status = item.status || item[2] || '—';
-                    const rawTime = item.timestamp || item[0];
-                    const formattedTime = rawTime ? new Date(rawTime).toLocaleString() : '—';
-
-                    let badgeClass = 'badge-none';
-                    if (status === "I'll Attend") {
-                        badgeClass = 'badge-attend';
-                        attend++;
-                    } else if (status === "Can't Attend") {
-                        badgeClass = 'badge-cant';
-                        cant++;
-                    } else if (status === "Not Sure Yet" || status === "? Not Sure") {
-                        badgeClass = 'badge-unsure';
-                        unsure++;
-                    }
-
-                    tableBody.innerHTML += `
-                        <tr>
-                            <td><strong>${user}</strong></td>
-                            <td>Member</td>
-                            <td><span class="badge ${badgeClass}">${status}</span></td>
-                            <td>${formattedTime}</td>
-                        </tr>
-                    `;
-                });
-
-                document.getElementById('countAttend').innerText = attend;
-                document.getElementById('countCant').innerText = cant;
-                document.getElementById('countUnsure').innerText = unsure;
-                document.getElementById('countTotal').innerText = rows.length;
-
+                allVotes = await response.json();
+                renderTable();
             } catch (err) {
                 console.error("Error fetching live data:", err);
-                tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#C62828; padding:24px;">Error loading live votes. Please refresh.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#C62828; padding:24px;">Error loading live votes. Please click Refresh.</td></tr>`;
             }
         }
 
-        // CSV Download Function
+        function renderTable() {
+            const selectedWeek = document.getElementById('filterWeek').value;
+            const tableBody = document.getElementById('attendanceTable');
+            document.getElementById('sideCardDate').innerText = selectedWeek === "ALL" ? "All Active Weeks" : selectedWeek;
+
+            const filtered = selectedWeek === "ALL" 
+                ? allVotes 
+                : allVotes.filter(item => (item.meetingDate || "Friday, October 24, 2025") === selectedWeek);
+
+            if (!filtered || filtered.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#8C8275; padding:24px;">No votes recorded for this week.</td></tr>`;
+                document.getElementById('countAttend').innerText = '0';
+                document.getElementById('countCant').innerText = '0';
+                document.getElementById('countUnsure').innerText = '0';
+                document.getElementById('countTotal').innerText = '0';
+                return;
+            }
+
+            tableBody.innerHTML = '';
+            let attend = 0, cant = 0, unsure = 0;
+
+            filtered.forEach(item => {
+                const user = item.user || 'Member';
+                const status = item.status || '—';
+                const week = item.meetingDate || 'Friday, October 24, 2025';
+                const formattedTime = item.timestamp ? new Date(item.timestamp).toLocaleString() : '—';
+
+                let badgeClass = 'badge-none';
+                if (status === "I'll Attend") {
+                    badgeClass = 'badge-attend';
+                    attend++;
+                } else if (status === "Can't Attend") {
+                    badgeClass = 'badge-cant';
+                    cant++;
+                } else if (status.includes("Not Sure")) {
+                    badgeClass = 'badge-unsure';
+                    unsure++;
+                }
+
+                tableBody.innerHTML += `
+                    <tr>
+                        <td><strong>${user}</strong></td>
+                        <td style="font-size: 11px; color: #70685C;">${week}</td>
+                        <td><span class="badge ${badgeClass}">${status}</span></td>
+                        <td style="font-size: 11px; color: #8C8275;">${formattedTime}</td>
+                        <td>
+                            <div class="btn-btn-group">
+                                <button class="btn-edit" onclick="editVote(${item.rowIndex}, '${user}', '${status}')">Edit</button>
+                                <button class="btn-delete" onclick="deleteVote(${item.rowIndex}, '${user}')">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('countAttend').innerText = attend;
+            document.getElementById('countCant').innerText = cant;
+            document.getElementById('countUnsure').innerText = unsure;
+            document.getElementById('countTotal').innerText = filtered.length;
+        }
+
+        async function editVote(rowIndex, currentUser, currentStatus) {
+            const newStatus = prompt(`Edit response status for ${currentUser}:\n1 = I'll Attend\n2 = Can't Attend\n3 = Not Sure Yet`, currentStatus);
+            let updatedStatus = currentStatus;
+
+            if (newStatus === '1' || newStatus === "I'll Attend") updatedStatus = "I'll Attend";
+            else if (newStatus === '2' || newStatus === "Can't Attend") updatedStatus = "Can't Attend";
+            else if (newStatus === '3' || newStatus === "Not Sure Yet") updatedStatus = "Not Sure Yet";
+            else return;
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'edit', rowIndex: rowIndex, status: updatedStatus })
+            });
+
+            alert(`Updated ${currentUser} to "${updatedStatus}". Refreshing table...`);
+            setTimeout(loadLiveVotes, 1000);
+        }
+
+        async function deleteVote(rowIndex, userName) {
+            if (confirm(`Are you sure you want to delete the vote for ${userName}?`)) {
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'delete', rowIndex: rowIndex })
+                });
+
+                alert(`Deleted record for ${userName}. Refreshing table...`);
+                setTimeout(loadLiveVotes, 1000);
+            }
+        }
+
         function exportCSV() {
-            let csv = 'Participant,Role,Response,Response Time\n';
+            let csv = 'Participant,Meeting Week,Response,Response Time\n';
             const rows = document.querySelectorAll("#attendanceTable tr");
             
             rows.forEach(row => {
                 const cols = row.querySelectorAll("td");
                 if (cols.length > 1) {
-                    const rowData = Array.from(cols).map(c => `"${c.innerText.trim()}"`).join(",");
+                    const rowData = [cols[0], cols[1], cols[2], cols[3]].map(c => `"${c.innerText.trim()}"`).join(",");
                     csv += rowData + "\n";
                 }
             });
@@ -318,7 +395,6 @@
             a.click();
         }
 
-        // Automatically fetch live votes on page load
         loadLiveVotes();
     </script>
 </body>
