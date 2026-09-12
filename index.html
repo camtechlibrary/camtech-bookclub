@@ -137,6 +137,8 @@
     </div>
 
     <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhMUC54uxlLZENauUL9CA2QdrHriUS5gFOc27189tZszWR3kWIH7uSe5aOtd4QB_Zi/exec";
+
         const tg = window.Telegram.WebApp;
         tg.expand();
 
@@ -155,8 +157,16 @@
         function submitRSVP(status) {
             if (!activeUser) {
                 const selectEl = document.getElementById('memberName');
-                activeUser = selectEl.value;
+                activeUser = selectEl ? selectEl.value : "Member";
             }
+
+            // Send live response to Google Sheet database
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user: activeUser, status: status })
+            });
 
             // Send data back to Telegram Bot backend if needed
             if (tg.sendData) {
