@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CamTech Library System - Librarian Console</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: #F5F1EA; 
+            color: #2C3E50; 
+        }
+
+        /* Top Bar */
+        .top-navbar {
+            background: #1B4332;
+            color: #FFFFFF;
+            padding: 12px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+        .nav-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; letter-spacing: 0.8px; }
+        .brand-icon { width: 22px; height: 22px; background: #FFF; color: #1B4332; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+        .nav-title { font-size: 12px; color: #D8F3DC; text-transform: uppercase; letter-spacing: 0.6px; }
+
+        /* Main Layout */
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 28px auto;
+            padding: 0 24px;
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 24px;
+        }
+        .page-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: #1B4332; }
+        .page-subtext { font-size: 13px; color: #70685C; margin-top: 2px; }
+
+        /* Metric Cards */
+        .metrics-grid {
+            display: flex;
+            gap: 14px;
+        }
+        .metric-card {
+            border-radius: 12px;
+            padding: 14px 20px;
+            min-width: 130px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .metric-card.confirmed { background: #E8F5E9; color: #1B4332; }
+        .metric-card.cant { background: #FFEBEE; color: #C62828; }
+        .metric-card.unsure { background: #FFFDE7; color: #F57F17; }
+        .metric-card.no-response { background: #ECEFF1; color: #455A64; }
+
+        .metric-label { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; }
+        .metric-value { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin-top: 6px; }
+
+        /* Main Grid Content */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 24px;
+        }
+
+        /* Side Cards */
+        .side-card {
+            background: #FAF7F2;
+            border-radius: 14px;
+            padding: 20px;
+            border: 1px solid #EAE3D9;
+            margin-bottom: 18px;
+        }
+        .card-label { font-size: 9px; font-weight: 700; letter-spacing: 0.8px; color: #8C8275; text-transform: uppercase; margin-bottom: 8px; }
+        .book-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: #1B4332; line-height: 1.3; }
+        .book-author { font-size: 12px; color: #70685C; margin-bottom: 16px; margin-top: 2px; }
+        .meta-item { font-size: 12px; color: #4A443C; margin-bottom: 8px; display: flex; gap: 8px; }
+
+        .staff-role { font-size: 12px; color: #4A443C; margin-bottom: 6px; }
+        .staff-role strong { color: #1B4332; }
+
+        /* Table Area */
+        .table-card {
+            background: #FFFFFF;
+            border-radius: 14px;
+            border: 1px solid #EAE3D9;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+        th { 
+            background: #FAF7F2; 
+            padding: 14px 18px; 
+            font-size: 11px; 
+            font-weight: 700; 
+            color: #8C8275; 
+            letter-spacing: 0.6px;
+            border-bottom: 1px solid #EAE3D9; 
+            text-transform: uppercase;
+        }
+        td { padding: 14px 18px; border-bottom: 1px solid #F2ECE4; color: #2C3E50; }
+        tr:last-child td { border-bottom: none; }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-attend { background: #E8F5E9; color: #1B4332; }
+        .badge-cant { background: #FFEBEE; color: #C62828; }
+        .badge-unsure { background: #FFF8E1; color: #B78103; }
+        .badge-none { background: #ECEFF1; color: #546E7A; }
+
+        /* Buttons Footer */
+        .actions-footer {
+            margin-top: 24px;
+            display: flex;
+            gap: 12px;
+        }
+        .btn-action {
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .btn-primary { background: #1B4332; color: #FFF; }
+        .btn-secondary { background: #FFFFFF; color: #2C3E50; border-color: #DCD4C8; }
+        .btn-action:hover { opacity: 0.9; }
+
+        @media print {
+            .top-navbar, .actions-footer { display: none; }
+            body { background: #FFF; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Bar -->
+    <div class="top-navbar">
+        <div class="nav-brand">
+            <div class="brand-icon">C</div>
+            <span>CAMTECH LIBRARY SYSTEM</span>
+        </div>
+        <div class="nav-title">Librarian Console</div>
+    </div>
+
+    <div class="dashboard-container">
+        <!-- Header & Summary Cards -->
+        <div class="header-row">
+            <div>
+                <h1 class="page-title">Book Club Attendance</h1>
+                <div class="page-subtext">Live status tracking and check-in metrics</div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card confirmed">
+                    <div class="metric-label">Confirmed</div>
+                    <div class="metric-value" id="countAttend">4</div>
+                </div>
+                <div class="metric-card cant">
+                    <div class="metric-label">Unable to Attend</div>
+                    <div class="metric-value" id="countCant">1</div>
+                </div>
+                <div class="metric-card unsure">
+                    <div class="metric-label">Not Sure</div>
+                    <div class="metric-value" id="countUnsure">1</div>
+                </div>
+                <div class="metric-card no-response">
+                    <div class="metric-label">No Response</div>
+                    <div class="metric-value" id="countNone">1</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content-grid">
+            <!-- Left Info Panel -->
+            <div>
+                <div class="side-card">
+                    <div class="card-label">Currently Reading</div>
+                    <div class="book-title">"The Library of Babel & Other Stories"</div>
+                    <div class="book-author">by Jorge Luis Borges</div>
+
+                    <div class="meta-item">📅 <span>Friday, October 24, 2025</span></div>
+                    <div class="meta-item">🕒 <span>3:30 PM - 5:00 PM</span></div>
+                    <div class="meta-item">📍 <span>CamTech Library Reading Lobby</span></div>
+                </div>
+
+                <div class="side-card">
+                    <div class="card-label">Staff Assignment</div>
+                    <div class="staff-role"><strong>Moderator:</strong> Dr. Elizabeth Vance</div>
+                    <div class="staff-role"><strong>Lead Readers:</strong> Julian Archer, Miriam Sterling</div>
+                </div>
+            </div>
+
+            <!-- Right Participants Table -->
+            <div>
+                <div class="table-card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Participant</th>
+                                <th>Role</th>
+                                <th>Response</th>
+                                <th>Response Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTable">
+                            <tr>
+                                <td><strong>Dr. Elizabeth Vance</strong></td>
+                                <td>Moderator</td>
+                                <td><span class="badge badge-attend">✓ I'll Attend</span></td>
+                                <td>Oct 22, 10:14 AM</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Julian Archer</strong></td>
+                                <td>Lead Reader</td>
+                                <td><span class="badge badge-attend">✓ I'll Attend</span></td>
+                                <td>Oct 22, 11:30 AM</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Miriam Sterling</strong></td>
+                                <td>Lead Reader</td>
+                                <td><span class="badge badge-unsure">? Not Sure</span></td>
+                                <td>Oct 23, 08:45 AM</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Arthur Pendelton</strong></td>
+                                <td>Member</td>
+                                <td><span class="badge badge-attend">✓ I'll Attend</span></td>
+                                <td>Oct 23, 02:15 PM</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Prof. Henry Higgins</strong></td>
+                                <td>Member</td>
+                                <td><span class="badge badge-cant">◯ I Can't Attend</span></td>
+                                <td>Oct 23, 09:12 AM</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Beatrice Thorne</strong></td>
+                                <td>Member</td>
+                                <td><span class="badge badge-attend">✓ I'll Attend</span></td>
+                                <td>Oct 24, 11:02 AM</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Charles Darwin</strong></td>
+                                <td>Member</td>
+                                <td><span class="badge badge-none">— No Response</span></td>
+                                <td>—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Export & Action Buttons -->
+                <div class="actions-footer">
+                    <button class="btn-action btn-primary" onclick="window.print()">Export Report</button>
+                    <button class="btn-action btn-secondary" onclick="exportCSV()">Download CSV</button>
+                    <button class="btn-action btn-secondary" onclick="window.print()">Print Attendance Record</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CSV Download Function
+        function exportCSV() {
+            let csv = 'Participant,Role,Response,Response Time\n';
+            const rows = document.querySelectorAll("#attendanceTable tr");
+            
+            rows.forEach(row => {
+                const cols = row.querySelectorAll("td");
+                const rowData = Array.from(cols).map(c => `"${c.innerText.trim()}"`).join(",");
+                csv += rowData + "\n";
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'CamTech_BookClub_Attendance.csv');
+            a.click();
+        }
+    </script>
+</body>
+</html>
