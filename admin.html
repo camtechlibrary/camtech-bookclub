@@ -186,9 +186,10 @@
                 <label for="filterWeek">Filter Week:</label>
                 <select id="filterWeek" onchange="renderTable()">
                     <option value="ALL">All Weeks</option>
-                    <option value="Friday, October 24, 2025" selected>Friday, Oct 24, 2025</option>
-                    <option value="Friday, October 31, 2025">Friday, Oct 31, 2025</option>
-                    <option value="Friday, November 07, 2025">Friday, Nov 07, 2025</option>
+                    <option value="Friday, September 18, 2026" selected>Friday, Sep 18, 2026</option>
+                    <option value="Friday, September 25, 2026">Friday, Sep 25, 2026</option>
+                    <option value="Friday, October 02, 2026">Friday, Oct 02, 2026</option>
+                    <option value="Friday, October 09, 2026">Friday, Oct 09, 2026</option>
                 </select>
             </div>
 
@@ -219,7 +220,7 @@
                     <div class="book-title">"The Library of Babel & Other Stories"</div>
                     <div class="book-author">by Jorge Luis Borges</div>
 
-                    <div class="meta-item">📅 <span id="sideCardDate">Friday, October 24, 2025</span></div>
+                    <div class="meta-item">📅 <span id="sideCardDate">Friday, September 18, 2026</span></div>
                     <div class="meta-item">🕒 <span>3:30 PM - 5:00 PM</span></div>
                     <div class="meta-item">📍 <span>CamTech Library Reading Lobby</span></div>
                 </div>
@@ -273,10 +274,42 @@
             try {
                 const response = await fetch(SCRIPT_URL);
                 allVotes = await response.json();
+                updateDynamicWeekDropdown();
                 renderTable();
             } catch (err) {
                 console.error("Error fetching live data:", err);
                 tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#C62828; padding:24px;">Error loading live votes. Please click Refresh.</td></tr>`;
+            }
+        }
+
+        // Dynamically add any newly voted meeting dates into the dropdown
+        function updateDynamicWeekDropdown() {
+            const select = document.getElementById('filterWeek');
+            const currentValue = select.value;
+            
+            // Extract unique meeting dates from live votes
+            const dynamicWeeks = new Set();
+            allVotes.forEach(vote => {
+                if (vote.meetingDate) dynamicWeeks.add(vote.meetingDate);
+            });
+
+            // Ensure baseline 2026 Fridays exist in set
+            dynamicWeeks.add("Friday, September 18, 2026");
+            dynamicWeeks.add("Friday, September 25, 2026");
+            dynamicWeeks.add("Friday, October 02, 2026");
+            dynamicWeeks.add("Friday, October 09, 2026");
+
+            // Rebuild options menu
+            let optionsHTML = `<option value="ALL">All Weeks</option>`;
+            dynamicWeeks.forEach(weekStr => {
+                optionsHTML += `<option value="${weekStr}">${weekStr}</option>`;
+            });
+
+            select.innerHTML = optionsHTML;
+            if (currentValue && select.querySelector(`option[value="${currentValue}"]`)) {
+                select.value = currentValue;
+            } else {
+                select.selectedIndex = 1; // Select first specific week by default
             }
         }
 
@@ -287,7 +320,7 @@
 
             const filtered = selectedWeek === "ALL" 
                 ? allVotes 
-                : allVotes.filter(item => (item.meetingDate || "Friday, October 24, 2025") === selectedWeek);
+                : allVotes.filter(item => (item.meetingDate || "Friday, September 18, 2026") === selectedWeek);
 
             if (!filtered || filtered.length === 0) {
                 tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#8C8275; padding:24px;">No votes recorded for this week.</td></tr>`;
@@ -304,7 +337,7 @@
             filtered.forEach(item => {
                 const user = item.user || 'Member';
                 const status = item.status || '—';
-                const week = item.meetingDate || 'Friday, October 24, 2025';
+                const week = item.meetingDate || 'Friday, September 18, 2026';
                 const formattedTime = item.timestamp ? new Date(item.timestamp).toLocaleString() : '—';
 
                 let badgeClass = 'badge-none';
