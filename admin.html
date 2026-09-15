@@ -24,7 +24,19 @@
         }
         .nav-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; letter-spacing: 0.8px; }
         .brand-icon { width: 22px; height: 22px; background: #FFF; color: #1B4332; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; }
-        .nav-title { font-size: 12px; color: #D8F3DC; text-transform: uppercase; letter-spacing: 0.6px; }
+        .nav-title { font-size: 12px; color: #D8F3DC; text-transform: uppercase; letter-spacing: 0.6px; display: flex; align-items: center; gap: 8px; }
+
+        .live-dot {
+            width: 8px; height: 8px; background-color: #2ECC71; border-radius: 50%; display: inline-block;
+            box-shadow: 0 0 0 0 rgba(46, 204, 113, 1);
+            animation: pulse-green 2s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+        }
 
         .dashboard-container {
             max-width: 1300px;
@@ -59,7 +71,7 @@
         .week-selector-card {
             background: #FFFFFF;
             border: 1px solid #EAE3D9;
-            padding: 10px 16px;
+            padding: 8px 14px;
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -75,6 +87,22 @@
             font-weight: 600;
             outline: none;
         }
+
+        .btn-add-session {
+            background: #1B4332;
+            color: #FFFFFF;
+            border: none;
+            padding: 7px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.2s ease;
+        }
+        .btn-add-session:hover { background: #2D6A4F; }
 
         .metrics-grid {
             display: flex;
@@ -157,6 +185,11 @@
         .actions-footer {
             margin-top: 24px;
             display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .actions-footer-buttons {
+            display: flex;
             gap: 12px;
         }
         .btn-action {
@@ -170,7 +203,7 @@
         .btn-primary { background: #1B4332; color: #FFF; }
         .btn-secondary { background: #FFFFFF; color: #2C3E50; border-color: #DCD4C8; }
 
-        /* EDIT MODAL STYLES */
+        /* MODAL STYLES */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -184,7 +217,7 @@
             background: #FFF;
             padding: 24px;
             border-radius: 12px;
-            width: 420px;
+            width: 440px;
             max-width: 90%;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
@@ -192,6 +225,7 @@
         .modal-field { margin-bottom: 12px; }
         .modal-field label { display: block; font-size: 11px; font-weight: 700; color: #8C8275; margin-bottom: 4px; text-transform: uppercase; }
         .modal-field input, .modal-field select { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid #DCD4C8; font-size: 12px; outline: none; }
+        .modal-field-checkbox { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 12px; color: #1B4332; font-weight: 600; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
     </style>
 </head>
@@ -202,7 +236,10 @@
             <div class="brand-icon">C</div>
             <span>CAMTECH LIBRARY SYSTEM</span>
         </div>
-        <div class="nav-title">Librarian Console</div>
+        <div class="nav-title">
+            <span class="live-dot"></span>
+            Librarian Console (Auto Sync)
+        </div>
     </div>
 
     <div class="dashboard-container">
@@ -220,9 +257,12 @@
 
             <div class="week-selector-card">
                 <label for="filterSession">Filter Session:</label>
-                <select id="filterSession" onchange="renderTable()">
+                <select id="filterSession" onchange="onSessionChange()">
                     <option value="ALL">All Sessions</option>
                 </select>
+                <button class="btn-add-session" onclick="openAddSessionModal()">
+                    ➕ Add Session
+                </button>
             </div>
 
             <div class="metrics-grid">
@@ -249,12 +289,12 @@
             <div>
                 <div class="side-card">
                     <div class="card-label">Currently Reading</div>
-                    <div class="book-title">"The Library of Babel & Other Stories"</div>
-                    <div class="book-author">by Jorge Luis Borges</div>
+                    <div class="book-title" id="sideCardBookTitle">"The Library of Babel & Other Stories"</div>
+                    <div class="book-author" id="sideCardBookAuthor">by Jorge Luis Borges</div>
 
                     <div class="meta-item">📅 <span id="sideCardSession">Session 11</span></div>
-                    <div class="meta-item">🕒 <span>3:30 PM - 5:00 PM</span></div>
-                    <div class="meta-item">📍 <span>CamTech University, lobby</span></div>
+                    <div class="meta-item">🕒 <span id="sideCardTime">3:30 PM - 5:00 PM</span></div>
+                    <div class="meta-item">📍 <span id="sideCardLocation">CamTech University, lobby</span></div>
                 </div>
 
                 <div class="side-card">
@@ -296,15 +336,18 @@
                 </div>
 
                 <div class="actions-footer">
-                    <button class="btn-action btn-primary" onclick="loadLiveVotes()">Refresh Data</button>
-                    <button class="btn-action btn-secondary" onclick="exportCSV()">Download CSV</button>
-                    <button class="btn-action btn-secondary" onclick="window.print()">Print Report</button>
+                    <div class="actions-footer-buttons">
+                        <button class="btn-action btn-primary" onclick="loadLiveVotes(false)">Refresh Data</button>
+                        <button class="btn-action btn-secondary" onclick="exportCSV()">Download CSV</button>
+                        <button class="btn-action btn-secondary" onclick="window.print()">Print Report</button>
+                    </div>
+                    <div id="syncStatus" style="font-size: 11px; color: #8C8275;">Auto-syncing active (every 10s)</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- FULL EDIT MODAL -->
+    <!-- EDIT ENTRY MODAL -->
     <div class="modal-overlay" id="editModal">
         <div class="modal-card">
             <div class="modal-title">Edit Entry</div>
@@ -346,22 +389,82 @@
         </div>
     </div>
 
+    <!-- ADD NEW SESSION MODAL -->
+    <div class="modal-overlay" id="addSessionModal">
+        <div class="modal-card">
+            <div class="modal-title">➕ Create New Book Session</div>
+            
+            <div class="modal-field">
+                <label>Session Name / Number</label>
+                <input type="text" id="newSessionName" placeholder="e.g. Session 12">
+            </div>
+            <div class="modal-field">
+                <label>Book Title</label>
+                <input type="text" id="newBookTitle" placeholder="e.g. The Library of Babel">
+            </div>
+            <div class="modal-field">
+                <label>Author Name</label>
+                <input type="text" id="newBookAuthor" placeholder="e.g. Jorge Luis Borges">
+            </div>
+            <div class="modal-field">
+                <label>Time & Schedule</label>
+                <input type="text" id="newSessionTime" value="3:30 PM - 5:00 PM">
+            </div>
+            <div class="modal-field">
+                <label>Location</label>
+                <input type="text" id="newSessionLocation" value="CamTech University, lobby">
+            </div>
+            <div class="modal-field-checkbox">
+                <input type="checkbox" id="broadcastTelegram" checked>
+                <label for="broadcastTelegram">Trigger Telegram Bot Announcement</label>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-action btn-secondary" onclick="closeAddSessionModal()">Cancel</button>
+                <button class="btn-action btn-primary" onclick="saveNewSession()">Create & Select</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2nvLYa1kNGijsg_XEqfW1lSdtsTUnOfBDrTkjL6GbyDsmPgKF2dI40rVu9ujQ9Xym/exec";
+        const AUTO_REFRESH_INTERVAL = 10000; // 10 seconds
         let allVotes = [];
 
-        async function loadLiveVotes() {
+        // Store custom created sessions in localStorage
+        let sessionDetailsMap = JSON.parse(localStorage.getItem('camtech_session_details')) || {
+            "Session 11": {
+                title: '"The Library of Babel & Other Stories"',
+                author: "by Jorge Luis Borges",
+                time: "3:30 PM - 5:00 PM",
+                location: "CamTech University, lobby"
+            }
+        };
+
+        async function loadLiveVotes(isSilent = false) {
+            const editOpen = document.getElementById('editModal').style.display === 'flex';
+            const addOpen = document.getElementById('addSessionModal').style.display === 'flex';
+            if (isSilent && (editOpen || addOpen)) return;
+
             const tableBody = document.getElementById('attendanceTable');
-            tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #8C8275; padding: 24px;">Fetching live votes...</td></tr>`;
+            
+            if (!isSilent) {
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #8C8275; padding: 24px;">Fetching live votes...</td></tr>`;
+            }
 
             try {
                 const response = await fetch(SCRIPT_URL);
                 allVotes = await response.json();
                 updateDynamicSessionDropdown();
                 renderTable();
+                
+                const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                document.getElementById('syncStatus').innerText = `Auto-synced at ${now}`;
             } catch (err) {
                 console.error("Error fetching live data:", err);
-                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#C62828; padding:24px;">Error loading data. Click Refresh.</td></tr>`;
+                if (!isSilent) {
+                    tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#C62828; padding:24px;">Error loading data. Click Refresh.</td></tr>`;
+                }
             }
         }
 
@@ -375,6 +478,11 @@
             const currentValue = select.value;
             
             const sessions = new Set();
+            
+            // Add manually created sessions
+            Object.keys(sessionDetailsMap).forEach(s => sessions.add(s));
+            
+            // Add sessions found in live vote data
             allVotes.forEach(vote => {
                 if (vote.session) {
                     sessions.add(extractSessionName(vote.session));
@@ -394,6 +502,28 @@
             }
         }
 
+        function onSessionChange() {
+            updateSideCardBookInfo();
+            renderTable();
+        }
+
+        function updateSideCardBookInfo() {
+            const selectedSession = document.getElementById('filterSession').value;
+            const details = sessionDetailsMap[selectedSession];
+
+            if (details) {
+                document.getElementById('sideCardBookTitle').innerText = details.title;
+                document.getElementById('sideCardBookAuthor').innerText = details.author;
+                document.getElementById('sideCardTime').innerText = details.time;
+                document.getElementById('sideCardLocation').innerText = details.location;
+            } else {
+                document.getElementById('sideCardBookTitle').innerText = '"The Library of Babel & Other Stories"';
+                document.getElementById('sideCardBookAuthor').innerText = 'by Jorge Luis Borges';
+                document.getElementById('sideCardTime').innerText = '3:30 PM - 5:00 PM';
+                document.getElementById('sideCardLocation').innerText = 'CamTech University, lobby';
+            }
+        }
+
         function renderTable() {
             const selectedSession = document.getElementById('filterSession').value;
             const tableBody = document.getElementById('attendanceTable');
@@ -404,7 +534,7 @@
                 : allVotes.filter(item => extractSessionName(item.session) === selectedSession);
 
             if (!filtered || filtered.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#8C8275; padding:24px;">No votes recorded for this session.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#8C8275; padding:24px;">No votes recorded for this session yet.</td></tr>`;
                 updateMetricsAndBanner(0, 0, 0, 0);
                 return;
             }
@@ -463,7 +593,6 @@
             document.getElementById('countUnsure').innerText = unsure;
             document.getElementById('countTotal').innerText = total;
 
-            // Connect Total Members Joining to Confirmed Attend count
             document.getElementById('totalMembers').value = attend;
             calculatePages();
 
@@ -473,7 +602,7 @@
 
             if (total === 0) {
                 banner.className = "status-alert-banner banner-confirmed";
-                bannerText.innerText = "ℹ️ No votes recorded yet for this session.";
+                bannerText.innerText = "ℹ️ Session created. Waiting for votes.";
                 statusPct.innerText = "";
                 return;
             }
@@ -501,6 +630,71 @@
 
             const perMember = Math.ceil(pages / members);
             document.getElementById('pageResult').innerText = `Each member reads ~${perMember} pages (${pages} pages ÷ ${members} joining members).`;
+        }
+
+        // ADD NEW SESSION CONTROLS
+        function openAddSessionModal() {
+            // Auto-suggest next session number
+            const existingNums = Object.keys(sessionDetailsMap).map(s => {
+                const num = parseInt(s.replace(/\D/g, ''));
+                return isNaN(num) ? 0 : num;
+            });
+            const nextNum = (Math.max(...existingNums, 11)) + 1;
+            document.getElementById('newSessionName').value = `Session ${nextNum}`;
+            document.getElementById('addSessionModal').style.display = 'flex';
+        }
+
+        function closeAddSessionModal() {
+            document.getElementById('addSessionModal').style.display = 'none';
+        }
+
+        async function saveNewSession() {
+            const sessionName = document.getElementById('newSessionName').value.trim();
+            const bookTitle = document.getElementById('newBookTitle').value.trim() || "Untitled Book";
+            const bookAuthor = document.getElementById('newBookAuthor').value.trim() || "Unknown Author";
+            const sessionTime = document.getElementById('newSessionTime').value.trim();
+            const sessionLocation = document.getElementById('newSessionLocation').value.trim();
+            const sendTelegram = document.getElementById('broadcastTelegram').checked;
+
+            if (!sessionName) {
+                alert("Please specify a session name (e.g. Session 12).");
+                return;
+            }
+
+            // Save details to session map
+            sessionDetailsMap[sessionName] = {
+                title: `"${bookTitle}"`,
+                author: `by ${bookAuthor}`,
+                time: sessionTime,
+                location: sessionLocation
+            };
+
+            localStorage.setItem('camtech_session_details', JSON.stringify(sessionDetailsMap));
+
+            // Notify backend Google Script if Telegram Broadcast is checked
+            if (sendTelegram) {
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'create_session',
+                        session: sessionName,
+                        bookTitle: bookTitle,
+                        bookAuthor: bookAuthor
+                    })
+                });
+            }
+
+            closeAddSessionModal();
+            updateDynamicSessionDropdown();
+
+            // Set filter to newly created session
+            const select = document.getElementById('filterSession');
+            select.value = sessionName;
+            onSessionChange();
+
+            alert(`✅ ${sessionName} created successfully!`);
         }
 
         // EDIT MODAL CONTROLS
@@ -542,7 +736,7 @@
             });
 
             alert(`Record updated for ${payload.user}. Refreshing...`);
-            setTimeout(loadLiveVotes, 1000);
+            setTimeout(() => loadLiveVotes(false), 1000);
         }
 
         async function deleteVote(rowIndex, userName) {
@@ -555,7 +749,7 @@
                 });
 
                 alert(`Deleted ${userName}. Refreshing...`);
-                setTimeout(loadLiveVotes, 1000);
+                setTimeout(() => loadLiveVotes(false), 1000);
             }
         }
 
@@ -579,7 +773,13 @@
             a.click();
         }
 
-        loadLiveVotes();
+        // Initial Load
+        loadLiveVotes(false);
+
+        // Auto-refresh periodically every 10 seconds silently
+        setInterval(() => {
+            loadLiveVotes(true);
+        }, AUTO_REFRESH_INTERVAL);
     </script>
 </body>
 </html>
