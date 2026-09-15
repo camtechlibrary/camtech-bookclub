@@ -6,25 +6,48 @@
     <title>CamTech Library System - Librarian Console</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --camtech-navy: #183B70;
+            --camtech-navy-hover: #234E8C;
+            --camtech-light-blue: #EBF2FA;
+            --camtech-accent-blue: #C0D6F0;
+            --bg-sand: #F5F1EA;
+            --card-bg: #FAF7F2;
+            --text-dark: #2C3E50;
+            --text-muted: #70685C;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
-            background: #F5F1EA; 
-            color: #2C3E50; 
+            background: var(--bg-sand); 
+            color: var(--text-dark); 
         }
 
+        /* NAVBAR WITH CAMTECH BRANDING */
         .top-navbar {
-            background: #1B4332;
+            background: var(--camtech-navy);
             color: #FFFFFF;
-            padding: 12px 28px;
+            padding: 10px 28px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 13px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .nav-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; letter-spacing: 0.8px; }
-        .brand-icon { width: 22px; height: 22px; background: #FFF; color: #1B4332; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; }
-        .nav-title { font-size: 12px; color: #D8F3DC; text-transform: uppercase; letter-spacing: 0.6px; display: flex; align-items: center; gap: 8px; }
+        .nav-brand { display: flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: 0.8px; }
+        
+        /* Logo Image Container */
+        .nav-logo {
+            height: 36px;
+            width: auto;
+            object-fit: contain;
+            background: #FFFFFF;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .nav-title { font-size: 12px; color: var(--camtech-accent-blue); text-transform: uppercase; letter-spacing: 0.6px; display: flex; align-items: center; gap: 8px; }
 
         .live-dot {
             width: 8px; height: 8px; background-color: #2ECC71; border-radius: 50%; display: inline-block;
@@ -54,7 +77,7 @@
             align-items: center;
             justify-content: space-between;
         }
-        .banner-confirmed { background: #E8F5E9; color: #1B4332; border: 1px solid #C8E6C9; }
+        .banner-confirmed { background: var(--camtech-light-blue); color: var(--camtech-navy); border: 1px solid var(--camtech-accent-blue); }
         .banner-canceled { background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; }
 
         .header-row {
@@ -65,8 +88,8 @@
             flex-wrap: wrap;
             gap: 16px;
         }
-        .page-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: #1B4332; }
-        .page-subtext { font-size: 13px; color: #70685C; margin-top: 2px; }
+        .page-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--camtech-navy); }
+        .page-subtext { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
 
         .week-selector-card {
             background: #FFFFFF;
@@ -83,13 +106,13 @@
             border-radius: 6px;
             border: 1px solid #DCD4C8;
             font-size: 13px;
-            color: #1B4332;
+            color: var(--camtech-navy);
             font-weight: 600;
             outline: none;
         }
 
         .btn-add-session {
-            background: #1B4332;
+            background: var(--camtech-navy);
             color: #FFFFFF;
             border: none;
             padding: 7px 14px;
@@ -102,11 +125,11 @@
             gap: 5px;
             transition: background 0.2s ease;
         }
-        .btn-add-session:hover { background: #2D6A4F; }
+        .btn-add-session:hover { background: var(--camtech-navy-hover); }
 
         .btn-edit-side {
             background: #EAE3D9;
-            color: #1B4332;
+            color: var(--camtech-navy);
             border: none;
             padding: 4px 8px;
             border-radius: 6px;
@@ -127,7 +150,7 @@
             min-width: 120px;
             border: 1px solid rgba(0,0,0,0.05);
         }
-        .metric-card.confirmed { background: #E8F5E9; color: #1B4332; }
+        .metric-card.confirmed { background: var(--camtech-light-blue); color: var(--camtech-navy); }
         .metric-card.cant { background: #FFEBEE; color: #C62828; }
         .metric-card.unsure { background: #FFFDE7; color: #F57F17; }
         .metric-card.no-response { background: #ECEFF1; color: #455A64; }
@@ -142,7 +165,7 @@
         }
 
         .side-card {
-            background: #FAF7F2;
+            background: var(--card-bg);
             border-radius: 14px;
             padding: 20px;
             border: 1px solid #EAE3D9;
@@ -155,14 +178,14 @@
             margin-bottom: 8px;
         }
         .card-label { font-size: 9px; font-weight: 700; letter-spacing: 0.8px; color: #8C8275; text-transform: uppercase; }
-        .book-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: #1B4332; line-height: 1.3; }
-        .book-author { font-size: 12px; color: #70685C; margin-bottom: 16px; margin-top: 2px; }
+        .book-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: var(--camtech-navy); line-height: 1.3; }
+        .book-author { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; margin-top: 2px; }
         .meta-item { font-size: 12px; color: #4A443C; margin-bottom: 8px; display: flex; gap: 8px; }
 
         .tool-input-group { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-        .tool-input-group label { font-size: 11px; font-weight: 600; color: #70685C; }
+        .tool-input-group label { font-size: 11px; font-weight: 600; color: var(--text-muted); }
         .tool-input-group input { padding: 6px 10px; border-radius: 6px; border: 1px solid #DCD4C8; font-size: 12px; }
-        .calc-result { margin-top: 10px; font-size: 12px; font-weight: 600; color: #1B4332; background: #E8F5E9; padding: 8px; border-radius: 6px; }
+        .calc-result { margin-top: 10px; font-size: 12px; font-weight: 600; color: var(--camtech-navy); background: var(--camtech-light-blue); padding: 8px; border-radius: 6px; }
 
         .table-card {
             background: #FFFFFF;
@@ -173,7 +196,7 @@
         }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
         th { 
-            background: #FAF7F2; 
+            background: var(--card-bg); 
             padding: 12px 14px; 
             font-size: 10px; 
             font-weight: 700; 
@@ -182,7 +205,7 @@
             border-bottom: 1px solid #EAE3D9; 
             text-transform: uppercase;
         }
-        td { padding: 10px 14px; border-bottom: 1px solid #F2ECE4; color: #2C3E50; }
+        td { padding: 10px 14px; border-bottom: 1px solid #F2ECE4; color: var(--text-dark); }
         tr:last-child td { border-bottom: none; }
 
         .badge {
@@ -192,13 +215,13 @@
             font-size: 10px;
             font-weight: 600;
         }
-        .badge-attend { background: #E8F5E9; color: #1B4332; }
+        .badge-attend { background: var(--camtech-light-blue); color: var(--camtech-navy); }
         .badge-cant { background: #FFEBEE; color: #C62828; }
         .badge-unsure { background: #FFF8E1; color: #B78103; }
         .badge-none { background: #ECEFF1; color: #546E7A; }
 
         .btn-btn-group { display: flex; gap: 4px; }
-        .btn-edit { background: #EAE3D9; color: #1B4332; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 600; }
+        .btn-edit { background: #EAE3D9; color: var(--camtech-navy); border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 600; }
         .btn-delete { background: #FFEBEE; color: #C62828; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 600; }
 
         .actions-footer {
@@ -207,10 +230,7 @@
             align-items: center;
             justify-content: space-between;
         }
-        .actions-footer-buttons {
-            display: flex;
-            gap: 12px;
-        }
+        .actions-footer-buttons { display: flex; gap: 12px; }
         .btn-action {
             padding: 10px 18px;
             border-radius: 8px;
@@ -219,8 +239,9 @@
             cursor: pointer;
             border: 1px solid transparent;
         }
-        .btn-primary { background: #1B4332; color: #FFF; }
-        .btn-secondary { background: #FFFFFF; color: #2C3E50; border-color: #DCD4C8; }
+        .btn-primary { background: var(--camtech-navy); color: #FFF; }
+        .btn-primary:hover { background: var(--camtech-navy-hover); }
+        .btn-secondary { background: #FFFFFF; color: var(--text-dark); border-color: #DCD4C8; }
 
         /* MODAL STYLES */
         .modal-overlay {
@@ -240,11 +261,11 @@
             max-width: 90%;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
-        .modal-title { font-family: 'Playfair Display', serif; font-size: 18px; color: #1B4332; margin-bottom: 16px; }
+        .modal-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--camtech-navy); margin-bottom: 16px; }
         .modal-field { margin-bottom: 12px; }
         .modal-field label { display: block; font-size: 11px; font-weight: 700; color: #8C8275; margin-bottom: 4px; text-transform: uppercase; }
         .modal-field input, .modal-field select { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid #DCD4C8; font-size: 12px; outline: none; }
-        .modal-field-checkbox { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 12px; color: #1B4332; font-weight: 600; }
+        .modal-field-checkbox { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 12px; color: var(--camtech-navy); font-weight: 600; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
     </style>
 </head>
@@ -252,7 +273,8 @@
 
     <div class="top-navbar">
         <div class="nav-brand">
-            <div class="brand-icon">C</div>
+            <!-- CamTech Logo File (Replace src with your local filename or uploaded image URL) -->
+            <img src="camtech_logo.png" alt="CamTech Logo" class="nav-logo" onerror="this.style.display='none'">
             <span>CAMTECH LIBRARY SYSTEM</span>
         </div>
         <div class="nav-title">
@@ -500,7 +522,6 @@
             const currentValue = select.value;
             
             const sessions = new Set();
-            
             Object.keys(sessionDetailsMap).forEach(s => sessions.add(s));
             
             allVotes.forEach(vote => {
@@ -531,7 +552,6 @@
         function updateSideCardBookInfo() {
             let selectedSession = document.getElementById('filterSession').value;
             
-            // If ALL is selected, resolve details to the newest specific session available
             if (selectedSession === "ALL") {
                 const select = document.getElementById('filterSession');
                 if (select.options.length > 1) {
@@ -683,19 +703,17 @@
             document.getElementById('addSessionModal').style.display = 'flex';
         }
 
-        // EDIT SESSION DETAILS CONTROLS (AUTO-DEFAULTS TO ACTIVE SESSION IF 'ALL' IS SELECTED)
         function openEditSessionModal() {
             const select = document.getElementById('filterSession');
             let selectedSession = select.value;
 
-            // If ALL is selected, switch to the top real session
             if (selectedSession === "ALL") {
                 if (select.options.length > 1) {
                     selectedSession = select.options[1].value;
                     select.value = selectedSession;
                     onSessionChange();
                 } else {
-                    alert("No session found to edit. Please create one first!");
+                    alert("No session found to edit.");
                     return;
                 }
             }
