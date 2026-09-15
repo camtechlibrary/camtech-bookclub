@@ -27,10 +27,23 @@
         .nav-title { font-size: 12px; color: #D8F3DC; text-transform: uppercase; letter-spacing: 0.6px; }
 
         .dashboard-container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 28px auto;
             padding: 0 24px;
         }
+
+        .status-alert-banner {
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .banner-confirmed { background: #E8F5E9; color: #1B4332; border: 1px solid #C8E6C9; }
+        .banner-canceled { background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; }
 
         .header-row {
             display: flex;
@@ -70,7 +83,7 @@
         .metric-card {
             border-radius: 12px;
             padding: 14px 20px;
-            min-width: 130px;
+            min-width: 120px;
             border: 1px solid rgba(0,0,0,0.05);
         }
         .metric-card.confirmed { background: #E8F5E9; color: #1B4332; }
@@ -83,7 +96,7 @@
 
         .content-grid {
             display: grid;
-            grid-template-columns: 300px 1fr;
+            grid-template-columns: 320px 1fr;
             gap: 24px;
         }
 
@@ -99,32 +112,37 @@
         .book-author { font-size: 12px; color: #70685C; margin-bottom: 16px; margin-top: 2px; }
         .meta-item { font-size: 12px; color: #4A443C; margin-bottom: 8px; display: flex; gap: 8px; }
 
+        .tool-input-group { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .tool-input-group label { font-size: 11px; font-weight: 600; color: #70685C; }
+        .tool-input-group input { padding: 6px 10px; border-radius: 6px; border: 1px solid #DCD4C8; font-size: 12px; }
+        .calc-result { margin-top: 10px; font-size: 12px; font-weight: 600; color: #1B4332; background: #E8F5E9; padding: 8px; border-radius: 6px; }
+
         .table-card {
             background: #FFFFFF;
             border-radius: 14px;
             border: 1px solid #EAE3D9;
-            overflow: hidden;
+            overflow-x: auto;
             box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
         th { 
             background: #FAF7F2; 
-            padding: 14px 18px; 
-            font-size: 11px; 
+            padding: 12px 14px; 
+            font-size: 10px; 
             font-weight: 700; 
             color: #8C8275; 
             letter-spacing: 0.6px;
             border-bottom: 1px solid #EAE3D9; 
             text-transform: uppercase;
         }
-        td { padding: 12px 18px; border-bottom: 1px solid #F2ECE4; color: #2C3E50; }
+        td { padding: 10px 14px; border-bottom: 1px solid #F2ECE4; color: #2C3E50; }
         tr:last-child td { border-bottom: none; }
 
         .badge {
             display: inline-block;
-            padding: 4px 10px;
+            padding: 4px 8px;
             border-radius: 6px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
         }
         .badge-attend { background: #E8F5E9; color: #1B4332; }
@@ -132,11 +150,9 @@
         .badge-unsure { background: #FFF8E1; color: #B78103; }
         .badge-none { background: #ECEFF1; color: #546E7A; }
 
-        .btn-btn-group { display: flex; gap: 6px; }
-        .btn-edit { background: #EAE3D9; color: #1B4332; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; }
-        .btn-delete { background: #FFEBEE; color: #C62828; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; }
-        .btn-edit:hover { background: #DCD4C8; }
-        .btn-delete:hover { background: #FFCDD2; }
+        .btn-btn-group { display: flex; gap: 4px; }
+        .btn-edit { background: #EAE3D9; color: #1B4332; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 600; }
+        .btn-delete { background: #FFEBEE; color: #C62828; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 600; }
 
         .actions-footer {
             margin-top: 24px;
@@ -150,16 +166,9 @@
             font-weight: 600;
             cursor: pointer;
             border: 1px solid transparent;
-            transition: all 0.2s ease;
         }
         .btn-primary { background: #1B4332; color: #FFF; }
         .btn-secondary { background: #FFFFFF; color: #2C3E50; border-color: #DCD4C8; }
-        .btn-action:hover { opacity: 0.9; }
-
-        @media print {
-            .top-navbar, .actions-footer, .week-selector-card, .btn-btn-group { display: none; }
-            body { background: #FFF; }
-        }
     </style>
 </head>
 <body>
@@ -173,20 +182,22 @@
     </div>
 
     <div class="dashboard-container">
+
+        <div id="statusBanner" class="status-alert-banner banner-confirmed">
+            <span id="statusBannerText">Checking session status...</span>
+            <span id="statusPercentage" style="font-size: 12px; opacity: 0.8;"></span>
+        </div>
+
         <div class="header-row">
             <div>
                 <h1 class="page-title">Book Club Attendance</h1>
-                <div class="page-subtext">Live status tracking and weekly check-in management</div>
+                <div class="page-subtext">Session 11 Check-In & Feedback Management</div>
             </div>
 
             <div class="week-selector-card">
-                <label for="filterWeek">Filter Week:</label>
-                <select id="filterWeek" onchange="renderTable()">
-                    <option value="ALL">All Weeks</option>
-                    <option value="Friday, September 18, 2026" selected>Friday, Sep 18, 2026</option>
-                    <option value="Friday, September 25, 2026">Friday, Sep 25, 2026</option>
-                    <option value="Friday, October 02, 2026">Friday, Oct 02, 2026</option>
-                    <option value="Friday, October 09, 2026">Friday, Oct 09, 2026</option>
+                <label for="filterSession">Filter Session:</label>
+                <select id="filterSession" onchange="renderTable()">
+                    <option value="ALL">All Sessions</option>
                 </select>
             </div>
 
@@ -196,7 +207,7 @@
                     <div class="metric-value" id="countAttend">0</div>
                 </div>
                 <div class="metric-card cant">
-                    <div class="metric-label">Unable to Attend</div>
+                    <div class="metric-label">Unable</div>
                     <div class="metric-value" id="countCant">0</div>
                 </div>
                 <div class="metric-card unsure">
@@ -217,9 +228,22 @@
                     <div class="book-title">"The Library of Babel & Other Stories"</div>
                     <div class="book-author">by Jorge Luis Borges</div>
 
-                    <div class="meta-item">📅 <span id="sideCardDate">Friday, September 18, 2026</span></div>
+                    <div class="meta-item">📅 <span id="sideCardSession">Session 11</span></div>
                     <div class="meta-item">🕒 <span>3:30 PM - 5:00 PM</span></div>
-                    <div class="meta-item">📍 <span>CamTech Library Reading Lobby</span></div>
+                    <div class="meta-item">📍 <span>CamTech University, lobby</span></div>
+                </div>
+
+                <div class="side-card">
+                    <div class="card-label">📖 Page Reading Splitter Tool</div>
+                    <div class="tool-input-group">
+                        <label>Total Book Pages:</label>
+                        <input type="number" id="totalPages" value="200" oninput="calculatePages()">
+                        <label>Total Members Joining:</label>
+                        <input type="number" id="totalMembers" value="10" oninput="calculatePages()">
+                    </div>
+                    <div class="calc-result" id="pageResult">
+                        Each member reads ~20 pages.
+                    </div>
                 </div>
             </div>
 
@@ -229,16 +253,18 @@
                         <thead>
                             <tr>
                                 <th>Participant</th>
-                                <th>Meeting Week</th>
+                                <th>Session</th>
                                 <th>Response</th>
-                                <th>Response Time</th>
+                                <th>Can't Join Reason</th>
+                                <th>Rating</th>
+                                <th>Comment</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="attendanceTable">
                             <tr>
-                                <td colspan="5" style="text-align: center; color: #8C8275; padding: 24px;">
-                                    Loading live dashboard data...
+                                <td colspan="7" style="text-align: center; color: #8C8275; padding: 24px;">
+                                    Loading session data...
                                 </td>
                             </tr>
                         </tbody>
@@ -248,7 +274,7 @@
                 <div class="actions-footer">
                     <button class="btn-action btn-primary" onclick="loadLiveVotes()">Refresh Data</button>
                     <button class="btn-action btn-secondary" onclick="exportCSV()">Download CSV</button>
-                    <button class="btn-action btn-secondary" onclick="window.print()">Print Attendance Record</button>
+                    <button class="btn-action btn-secondary" onclick="window.print()">Print Report</button>
                 </div>
             </div>
         </div>
@@ -258,82 +284,55 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2nvLYa1kNGijsg_XEqfW1lSdtsTUnOfBDrTkjL6GbyDsmPgKF2dI40rVu9ujQ9Xym/exec";
         let allVotes = [];
 
-        function formatMeetingDate(rawDate) {
-            if (!rawDate) return "Friday, September 18, 2026";
-            
-            if (typeof rawDate === 'string' && rawDate.includes('T') && rawDate.endsWith('Z')) {
-                const parsed = new Date(rawDate);
-                if (!isNaN(parsed.getTime())) {
-                    const options = { weekday: 'long', year: 'numeric', month: 'long', day: '2-digit' };
-                    return parsed.toLocaleDateString('en-US', options);
-                }
-            }
-            return rawDate;
-        }
-
         async function loadLiveVotes() {
             const tableBody = document.getElementById('attendanceTable');
-            tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #8C8275; padding: 24px;">Fetching votes...</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #8C8275; padding: 24px;">Fetching live votes...</td></tr>`;
 
             try {
                 const response = await fetch(SCRIPT_URL);
-                const rawData = await response.json();
-                
-                allVotes = rawData.map(item => ({
-                    ...item,
-                    meetingDate: formatMeetingDate(item.meetingDate)
-                }));
-
-                updateDynamicWeekDropdown();
+                allVotes = await response.json();
+                updateDynamicSessionDropdown();
                 renderTable();
             } catch (err) {
                 console.error("Error fetching live data:", err);
-                tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#C62828; padding:24px;">Error loading live votes. Please click Refresh.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#C62828; padding:24px;">Error loading data. Click Refresh.</td></tr>`;
             }
         }
 
-        function updateDynamicWeekDropdown() {
-            const select = document.getElementById('filterWeek');
+        function updateDynamicSessionDropdown() {
+            const select = document.getElementById('filterSession');
             const currentValue = select.value;
             
-            const dynamicWeeks = new Set();
+            const sessions = new Set();
             allVotes.forEach(vote => {
-                if (vote.meetingDate) dynamicWeeks.add(vote.meetingDate);
+                if (vote.session) sessions.add(vote.session);
             });
 
-            dynamicWeeks.add("Friday, September 18, 2026");
-            dynamicWeeks.add("Friday, September 25, 2026");
-            dynamicWeeks.add("Friday, October 02, 2026");
-            dynamicWeeks.add("Friday, October 09, 2026");
-
-            let optionsHTML = `<option value="ALL">All Weeks</option>`;
-            dynamicWeeks.forEach(weekStr => {
-                optionsHTML += `<option value="${weekStr}">${weekStr}</option>`;
+            let optionsHTML = `<option value="ALL">All Sessions</option>`;
+            sessions.forEach(sess => {
+                optionsHTML += `<option value="${sess}">${sess}</option>`;
             });
 
             select.innerHTML = optionsHTML;
             if (currentValue && select.querySelector(`option[value="${currentValue}"]`)) {
                 select.value = currentValue;
-            } else {
+            } else if (select.options.length > 1) {
                 select.selectedIndex = 1;
             }
         }
 
         function renderTable() {
-            const selectedWeek = document.getElementById('filterWeek').value;
+            const selectedSession = document.getElementById('filterSession').value;
             const tableBody = document.getElementById('attendanceTable');
-            document.getElementById('sideCardDate').innerText = selectedWeek === "ALL" ? "All Active Weeks" : selectedWeek;
+            document.getElementById('sideCardSession').innerText = selectedSession === "ALL" ? "All Sessions" : selectedSession;
 
-            const filtered = selectedWeek === "ALL" 
+            const filtered = selectedSession === "ALL" 
                 ? allVotes 
-                : allVotes.filter(item => (item.meetingDate || "Friday, September 18, 2026") === selectedWeek);
+                : allVotes.filter(item => item.session === selectedSession);
 
             if (!filtered || filtered.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#8C8275; padding:24px;">No votes recorded for this week.</td></tr>`;
-                document.getElementById('countAttend').innerText = '0';
-                document.getElementById('countCant').innerText = '0';
-                document.getElementById('countUnsure').innerText = '0';
-                document.getElementById('countTotal').innerText = '0';
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#8C8275; padding:24px;">No votes recorded for this session.</td></tr>`;
+                updateMetricsAndBanner(0, 0, 0, 0);
                 return;
             }
 
@@ -343,8 +342,10 @@
             filtered.forEach(item => {
                 const user = item.user || 'Member';
                 const status = item.status || '—';
-                const week = item.meetingDate || 'Friday, September 18, 2026';
-                const formattedTime = item.timestamp ? new Date(item.timestamp).toLocaleString() : '—';
+                const session = item.session || 'Session 11';
+                const reason = item.reason || '—';
+                const rating = item.rating || '—';
+                const comment = item.comment || '—';
 
                 let badgeClass = 'badge-none';
                 if (status === "I'll Attend") {
@@ -361,9 +362,11 @@
                 tableBody.innerHTML += `
                     <tr>
                         <td><strong>${user}</strong></td>
-                        <td style="font-size: 11px; color: #70685C;">${week}</td>
+                        <td style="font-size: 11px; color: #70685C;">${session}</td>
                         <td><span class="badge ${badgeClass}">${status}</span></td>
-                        <td style="font-size: 11px; color: #8C8275;">${formattedTime}</td>
+                        <td style="font-size: 11px; color: #C62828;">${reason}</td>
+                        <td>${rating}</td>
+                        <td style="font-size: 11px; color: #555;">${comment}</td>
                         <td>
                             <div class="btn-btn-group">
                                 <button class="btn-edit" onclick="editVote(${item.rowIndex}, '${user}', '${status}')">Edit</button>
@@ -374,14 +377,48 @@
                 `;
             });
 
+            updateMetricsAndBanner(attend, cant, unsure, filtered.length);
+        }
+
+        function updateMetricsAndBanner(attend, cant, unsure, total) {
             document.getElementById('countAttend').innerText = attend;
             document.getElementById('countCant').innerText = cant;
             document.getElementById('countUnsure').innerText = unsure;
-            document.getElementById('countTotal').innerText = filtered.length;
+            document.getElementById('countTotal').innerText = total;
+
+            const banner = document.getElementById('statusBanner');
+            const bannerText = document.getElementById('statusBannerText');
+            const statusPct = document.getElementById('statusPercentage');
+
+            if (total === 0) {
+                banner.className = "status-alert-banner banner-confirmed";
+                bannerText.innerText = "ℹ️ No votes recorded yet for this session.";
+                statusPct.innerText = "";
+                return;
+            }
+
+            const attendanceRate = (attend / total) * 100;
+            statusPct.innerText = `Attendance Rate: ${attendanceRate.toFixed(1)}% (${attend}/${total})`;
+
+            if (attendanceRate < 50) {
+                banner.className = "status-alert-banner banner-canceled";
+                bannerText.innerText = "🚨 MEETING CANCELED / POSTPONED: Attendance is currently below 50%.";
+            } else {
+                banner.className = "status-alert-banner banner-confirmed";
+                bannerText.innerText = "✅ MEETING CONFIRMED: Attendance requirement (>50%) is satisfied.";
+            }
+        }
+
+        function calculatePages() {
+            const pages = parseInt(document.getElementById('totalPages').value) || 0;
+            const members = parseInt(document.getElementById('totalMembers').value) || 1;
+            const perMember = Math.ceil(pages / members);
+
+            document.getElementById('pageResult').innerText = `Each member reads ~${perMember} pages (${pages} pages ÷ ${members} members).`;
         }
 
         async function editVote(rowIndex, currentUser, currentStatus) {
-            const newStatus = prompt(`Edit response status for ${currentUser}:\n1 = I'll Attend\n2 = Can't Attend\n3 = Not Sure Yet`, currentStatus);
+            const newStatus = prompt(`Edit status for ${currentUser}:\n1 = I'll Attend\n2 = Can't Attend\n3 = Not Sure Yet`, currentStatus);
             let updatedStatus = currentStatus;
 
             if (newStatus === '1' || newStatus === "I'll Attend") updatedStatus = "I'll Attend";
@@ -396,12 +433,12 @@
                 body: JSON.stringify({ action: 'edit', rowIndex: rowIndex, status: updatedStatus })
             });
 
-            alert(`Updated ${currentUser} to "${updatedStatus}". Refreshing table...`);
+            alert(`Updated ${currentUser}. Refreshing...`);
             setTimeout(loadLiveVotes, 1000);
         }
 
         async function deleteVote(rowIndex, userName) {
-            if (confirm(`Are you sure you want to delete the vote for ${userName}?`)) {
+            if (confirm(`Delete record for ${userName}?`)) {
                 fetch(SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -409,19 +446,19 @@
                     body: JSON.stringify({ action: 'delete', rowIndex: rowIndex })
                 });
 
-                alert(`Deleted record for ${userName}. Refreshing table...`);
+                alert(`Deleted ${userName}. Refreshing...`);
                 setTimeout(loadLiveVotes, 1000);
             }
         }
 
         function exportCSV() {
-            let csv = 'Participant,Meeting Week,Response,Response Time\n';
+            let csv = 'Participant,Session,Response,Reason,Rating,Comment\n';
             const rows = document.querySelectorAll("#attendanceTable tr");
             
             rows.forEach(row => {
                 const cols = row.querySelectorAll("td");
                 if (cols.length > 1) {
-                    const rowData = [cols[0], cols[1], cols[2], cols[3]].map(c => `"${c.innerText.trim()}"`).join(",");
+                    const rowData = [cols[0], cols[1], cols[2], cols[3], cols[4], cols[5]].map(c => `"${c.innerText.trim()}"`).join(",");
                     csv += rowData + "\n";
                 }
             });
@@ -430,7 +467,7 @@
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.setAttribute('href', url);
-            a.setAttribute('download', 'CamTech_BookClub_Attendance.csv');
+            a.setAttribute('download', 'CamTech_BookClub_Session11.csv');
             a.click();
         }
 
