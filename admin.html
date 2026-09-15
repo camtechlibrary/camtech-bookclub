@@ -169,6 +169,30 @@
         }
         .btn-primary { background: #1B4332; color: #FFF; }
         .btn-secondary { background: #FFFFFF; color: #2C3E50; border-color: #DCD4C8; }
+
+        /* EDIT MODAL STYLES */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-card {
+            background: #FFF;
+            padding: 24px;
+            border-radius: 12px;
+            width: 420px;
+            max-width: 90%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .modal-title { font-family: 'Playfair Display', serif; font-size: 18px; color: #1B4332; margin-bottom: 16px; }
+        .modal-field { margin-bottom: 12px; }
+        .modal-field label { display: block; font-size: 11px; font-weight: 700; color: #8C8275; margin-bottom: 4px; text-transform: uppercase; }
+        .modal-field input, .modal-field select { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid #DCD4C8; font-size: 12px; outline: none; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
     </style>
 </head>
 <body>
@@ -191,7 +215,7 @@
         <div class="header-row">
             <div>
                 <h1 class="page-title">Book Club Attendance</h1>
-                <div class="page-subtext">Session 11 Check-In & Feedback Management</div>
+                <div class="page-subtext">Session Management & Participant Feedback</div>
             </div>
 
             <div class="week-selector-card">
@@ -238,11 +262,11 @@
                     <div class="tool-input-group">
                         <label>Total Book Pages:</label>
                         <input type="number" id="totalPages" value="200" oninput="calculatePages()">
-                        <label>Total Members Joining:</label>
-                        <input type="number" id="totalMembers" value="10" oninput="calculatePages()">
+                        <label>Total Members Joining (Auto-linked to Confirmed):</label>
+                        <input type="number" id="totalMembers" value="0" oninput="calculatePages()">
                     </div>
                     <div class="calc-result" id="pageResult">
-                        Each member reads ~20 pages.
+                        Each member reads ~0 pages.
                     </div>
                 </div>
             </div>
@@ -280,6 +304,48 @@
         </div>
     </div>
 
+    <!-- FULL EDIT MODAL -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-card">
+            <div class="modal-title">Edit Entry</div>
+            <input type="hidden" id="editRowIndex">
+            
+            <div class="modal-field">
+                <label>Participant Name</label>
+                <input type="text" id="editUser">
+            </div>
+            <div class="modal-field">
+                <label>Session</label>
+                <input type="text" id="editSession">
+            </div>
+            <div class="modal-field">
+                <label>Response Status</label>
+                <select id="editStatus">
+                    <option value="I'll Attend">I'll Attend</option>
+                    <option value="Can't Attend">Can't Attend</option>
+                    <option value="Not Sure Yet">Not Sure Yet</option>
+                </select>
+            </div>
+            <div class="modal-field">
+                <label>Can't Join Reason</label>
+                <input type="text" id="editReason">
+            </div>
+            <div class="modal-field">
+                <label>Rating</label>
+                <input type="text" id="editRating" placeholder="e.g. 5 ⭐">
+            </div>
+            <div class="modal-field">
+                <label>Comment</label>
+                <input type="text" id="editComment">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-action btn-secondary" onclick="closeEditModal()">Cancel</button>
+                <button class="btn-action btn-primary" onclick="saveFullEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2nvLYa1kNGijsg_XEqfW1lSdtsTUnOfBDrTkjL6GbyDsmPgKF2dI40rVu9ujQ9Xym/exec";
         let allVotes = [];
@@ -299,17 +365,24 @@
             }
         }
 
+        function extractSessionName(sessionStr) {
+            if (!sessionStr) return "Session 11";
+            return sessionStr.split(" (")[0].trim();
+        }
+
         function updateDynamicSessionDropdown() {
             const select = document.getElementById('filterSession');
             const currentValue = select.value;
             
             const sessions = new Set();
             allVotes.forEach(vote => {
-                if (vote.session) sessions.add(vote.session);
+                if (vote.session) {
+                    sessions.add(extractSessionName(vote.session));
+                }
             });
 
             let optionsHTML = `<option value="ALL">All Sessions</option>`;
-            sessions.forEach(sess => {
+            Array.from(sessions).reverse().forEach(sess => {
                 optionsHTML += `<option value="${sess}">${sess}</option>`;
             });
 
@@ -317,7 +390,7 @@
             if (currentValue && select.querySelector(`option[value="${currentValue}"]`)) {
                 select.value = currentValue;
             } else if (select.options.length > 1) {
-                select.selectedIndex = 1;
+                select.selectedIndex = 1; // Default to most recent session
             }
         }
 
@@ -328,7 +401,7 @@
 
             const filtered = selectedSession === "ALL" 
                 ? allVotes 
-                : allVotes.filter(item => item.session === selectedSession);
+                : allVotes.filter(item => extractSessionName(item.session) === selectedSession);
 
             if (!filtered || filtered.length === 0) {
                 tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#8C8275; padding:24px;">No votes recorded for this session.</td></tr>`;
@@ -342,7 +415,7 @@
             filtered.forEach(item => {
                 const user = item.user || 'Member';
                 const status = item.status || '—';
-                const session = item.session || 'Session 11';
+                const session = extractSessionName(item.session);
                 const reason = item.reason || '—';
                 const rating = item.rating || '—';
                 const comment = item.comment || '—';
@@ -369,8 +442,8 @@
                         <td style="font-size: 11px; color: #555;">${comment}</td>
                         <td>
                             <div class="btn-btn-group">
-                                <button class="btn-edit" onclick="editVote(${item.rowIndex}, '${user}', '${status}')">Edit</button>
-                                <button class="btn-delete" onclick="deleteVote(${item.rowIndex}, '${user}')">Delete</button>
+                                <button class="btn-edit" onclick="openEditModal(${item.rowIndex}, '${escapeHtml(user)}', '${escapeHtml(session)}', '${escapeHtml(status)}', '${escapeHtml(reason)}', '${escapeHtml(rating)}', '${escapeHtml(comment)}')">Edit</button>
+                                <button class="btn-delete" onclick="deleteVote(${item.rowIndex}, '${escapeHtml(user)}')">Delete</button>
                             </div>
                         </td>
                     </tr>
@@ -380,11 +453,19 @@
             updateMetricsAndBanner(attend, cant, unsure, filtered.length);
         }
 
+        function escapeHtml(str) {
+            return (str || '').toString().replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
         function updateMetricsAndBanner(attend, cant, unsure, total) {
             document.getElementById('countAttend').innerText = attend;
             document.getElementById('countCant').innerText = cant;
             document.getElementById('countUnsure').innerText = unsure;
             document.getElementById('countTotal').innerText = total;
+
+            // Connect Total Members Joining to Confirmed Attend count
+            document.getElementById('totalMembers').value = attend;
+            calculatePages();
 
             const banner = document.getElementById('statusBanner');
             const bannerText = document.getElementById('statusBannerText');
@@ -411,29 +492,56 @@
 
         function calculatePages() {
             const pages = parseInt(document.getElementById('totalPages').value) || 0;
-            const members = parseInt(document.getElementById('totalMembers').value) || 1;
-            const perMember = Math.ceil(pages / members);
+            const members = parseInt(document.getElementById('totalMembers').value) || 0;
+            
+            if (members <= 0) {
+                document.getElementById('pageResult').innerText = `No confirmed members joining yet.`;
+                return;
+            }
 
-            document.getElementById('pageResult').innerText = `Each member reads ~${perMember} pages (${pages} pages ÷ ${members} members).`;
+            const perMember = Math.ceil(pages / members);
+            document.getElementById('pageResult').innerText = `Each member reads ~${perMember} pages (${pages} pages ÷ ${members} joining members).`;
         }
 
-        async function editVote(rowIndex, currentUser, currentStatus) {
-            const newStatus = prompt(`Edit status for ${currentUser}:\n1 = I'll Attend\n2 = Can't Attend\n3 = Not Sure Yet`, currentStatus);
-            let updatedStatus = currentStatus;
+        // EDIT MODAL CONTROLS
+        function openEditModal(rowIndex, user, session, status, reason, rating, comment) {
+            document.getElementById('editRowIndex').value = rowIndex;
+            document.getElementById('editUser').value = user;
+            document.getElementById('editSession').value = session;
+            document.getElementById('editStatus').value = status;
+            document.getElementById('editReason').value = reason === '—' ? '' : reason;
+            document.getElementById('editRating').value = rating === '—' ? '' : rating;
+            document.getElementById('editComment').value = comment === '—' ? '' : comment;
 
-            if (newStatus === '1' || newStatus === "I'll Attend") updatedStatus = "I'll Attend";
-            else if (newStatus === '2' || newStatus === "Can't Attend") updatedStatus = "Can't Attend";
-            else if (newStatus === '3' || newStatus === "Not Sure Yet") updatedStatus = "Not Sure Yet";
-            else return;
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        async function saveFullEdit() {
+            const payload = {
+                action: 'edit',
+                rowIndex: parseInt(document.getElementById('editRowIndex').value),
+                user: document.getElementById('editUser').value,
+                session: document.getElementById('editSession').value,
+                status: document.getElementById('editStatus').value,
+                reason: document.getElementById('editReason').value,
+                rating: document.getElementById('editRating').value,
+                comment: document.getElementById('editComment').value
+            };
+
+            closeEditModal();
 
             fetch(SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'edit', rowIndex: rowIndex, status: updatedStatus })
+                body: JSON.stringify(payload)
             });
 
-            alert(`Updated ${currentUser}. Refreshing...`);
+            alert(`Record updated for ${payload.user}. Refreshing...`);
             setTimeout(loadLiveVotes, 1000);
         }
 
@@ -467,7 +575,7 @@
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.setAttribute('href', url);
-            a.setAttribute('download', 'CamTech_BookClub_Session11.csv');
+            a.setAttribute('download', 'CamTech_BookClub_Report.csv');
             a.click();
         }
 
