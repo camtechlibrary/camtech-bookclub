@@ -99,9 +99,6 @@
         .book-author { font-size: 12px; color: #70685C; margin-bottom: 16px; margin-top: 2px; }
         .meta-item { font-size: 12px; color: #4A443C; margin-bottom: 8px; display: flex; gap: 8px; }
 
-        .staff-role { font-size: 12px; color: #4A443C; margin-bottom: 6px; }
-        .staff-role strong { color: #1B4332; }
-
         .table-card {
             background: #FFFFFF;
             border-radius: 14px;
@@ -224,12 +221,6 @@
                     <div class="meta-item">🕒 <span>3:30 PM - 5:00 PM</span></div>
                     <div class="meta-item">📍 <span>CamTech Library Reading Lobby</span></div>
                 </div>
-
-                <div class="side-card">
-                    <div class="card-label">Staff Assignment</div>
-                    <div class="staff-role"><strong>Moderator:</strong> Dr. Elizabeth Vance</div>
-                    <div class="staff-role"><strong>Lead Readers:</strong> Julian Archer, Miriam Sterling</div>
-                </div>
             </div>
 
             <div>
@@ -267,7 +258,6 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2nvLYa1kNGijsg_XEqfW1lSdtsTUnOfBDrTkjL6GbyDsmPgKF2dI40rVu9ujQ9Xym/exec";
         let allVotes = [];
 
-        // Converts ISO date strings (e.g., 2026-09-17T17:00:00.000Z) back to "Friday, September 18, 2026"
         function formatMeetingDate(rawDate) {
             if (!rawDate) return "Friday, September 18, 2026";
             
@@ -289,7 +279,6 @@
                 const response = await fetch(SCRIPT_URL);
                 const rawData = await response.json();
                 
-                // Format and clean meeting dates automatically
                 allVotes = rawData.map(item => ({
                     ...item,
                     meetingDate: formatMeetingDate(item.meetingDate)
@@ -303,24 +292,20 @@
             }
         }
 
-        // Dynamically add any newly voted meeting dates into the dropdown
         function updateDynamicWeekDropdown() {
             const select = document.getElementById('filterWeek');
             const currentValue = select.value;
             
-            // Extract unique meeting dates from live votes
             const dynamicWeeks = new Set();
             allVotes.forEach(vote => {
                 if (vote.meetingDate) dynamicWeeks.add(vote.meetingDate);
             });
 
-            // Ensure baseline 2026 Fridays exist in set
             dynamicWeeks.add("Friday, September 18, 2026");
             dynamicWeeks.add("Friday, September 25, 2026");
             dynamicWeeks.add("Friday, October 02, 2026");
             dynamicWeeks.add("Friday, October 09, 2026");
 
-            // Rebuild options menu
             let optionsHTML = `<option value="ALL">All Weeks</option>`;
             dynamicWeeks.forEach(weekStr => {
                 optionsHTML += `<option value="${weekStr}">${weekStr}</option>`;
@@ -330,7 +315,7 @@
             if (currentValue && select.querySelector(`option[value="${currentValue}"]`)) {
                 select.value = currentValue;
             } else {
-                select.selectedIndex = 1; // Select first specific week by default
+                select.selectedIndex = 1;
             }
         }
 
