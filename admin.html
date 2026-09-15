@@ -450,11 +450,10 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2nvLYa1kNGijsg_XEqfW1lSdtsTUnOfBDrTkjL6GbyDsmPgKF2dI40rVu9ujQ9Xym/exec";
-        const AUTO_REFRESH_INTERVAL = 10000; // 10 seconds
+        const AUTO_REFRESH_INTERVAL = 10000;
         let allVotes = [];
         let isEditingSessionMode = false;
 
-        // Persistent Session Storage
         let sessionDetailsMap = JSON.parse(localStorage.getItem('camtech_session_details')) || {
             "Session 11": {
                 title: '"The Library of Babel & Other Stories"',
@@ -502,10 +501,8 @@
             
             const sessions = new Set();
             
-            // Add custom sessions
             Object.keys(sessionDetailsMap).forEach(s => sessions.add(s));
             
-            // Add live vote sessions
             allVotes.forEach(vote => {
                 if (vote.session) {
                     sessions.add(extractSessionName(vote.session));
@@ -532,7 +529,16 @@
         }
 
         function updateSideCardBookInfo() {
-            const selectedSession = document.getElementById('filterSession').value;
+            let selectedSession = document.getElementById('filterSession').value;
+            
+            // If ALL is selected, resolve details to the newest specific session available
+            if (selectedSession === "ALL") {
+                const select = document.getElementById('filterSession');
+                if (select.options.length > 1) {
+                    selectedSession = select.options[1].value;
+                }
+            }
+
             const details = sessionDetailsMap[selectedSession];
 
             if (details) {
@@ -656,7 +662,6 @@
             document.getElementById('pageResult').innerText = `Each member reads ~${perMember} pages (${pages} pages ÷ ${members} joining members).`;
         }
 
-        // ADD NEW SESSION MODAL CONTROLS
         function openAddSessionModal() {
             isEditingSessionMode = false;
             document.getElementById('sessionModalTitle').innerText = "➕ Create New Book Session";
@@ -678,12 +683,21 @@
             document.getElementById('addSessionModal').style.display = 'flex';
         }
 
-        // EDIT CURRENT SESSION DETAILS CONTROLS
+        // EDIT SESSION DETAILS CONTROLS (AUTO-DEFAULTS TO ACTIVE SESSION IF 'ALL' IS SELECTED)
         function openEditSessionModal() {
-            const selectedSession = document.getElementById('filterSession').value;
+            const select = document.getElementById('filterSession');
+            let selectedSession = select.value;
+
+            // If ALL is selected, switch to the top real session
             if (selectedSession === "ALL") {
-                alert("Please select a specific session (e.g. Session 11, Session 12, Session 13) from the filter dropdown to edit.");
-                return;
+                if (select.options.length > 1) {
+                    selectedSession = select.options[1].value;
+                    select.value = selectedSession;
+                    onSessionChange();
+                } else {
+                    alert("No session found to edit. Please create one first!");
+                    return;
+                }
             }
 
             isEditingSessionMode = true;
@@ -698,7 +712,6 @@
                 location: "CamTech University, lobby"
             };
 
-            // Clean leading/trailing quotes or 'by ' prefix for editing view
             let cleanTitle = details.title.replace(/^"(.*)"$/, '$1');
             let cleanAuthor = details.author.replace(/^by\s+/i, '');
 
@@ -728,7 +741,6 @@
                 return;
             }
 
-            // Update local memory map
             sessionDetailsMap[sessionName] = {
                 title: `"${bookTitle}"`,
                 author: `by ${bookAuthor}`,
@@ -738,7 +750,6 @@
 
             localStorage.setItem('camtech_session_details', JSON.stringify(sessionDetailsMap));
 
-            // Trigger Telegram broadcast only when creating new session
             if (!isEditingSessionMode && sendTelegram) {
                 fetch(SCRIPT_URL, {
                     method: 'POST',
@@ -756,7 +767,6 @@
             closeAddSessionModal();
             updateDynamicSessionDropdown();
 
-            // Set filter select to current session
             const select = document.getElementById('filterSession');
             select.value = sessionName;
             onSessionChange();
@@ -764,7 +774,6 @@
             alert(isEditingSessionMode ? `✅ ${sessionName} details updated!` : `✅ ${sessionName} created!`);
         }
 
-        // EDIT USER ENTRY CONTROLS
         function openEditModal(rowIndex, user, session, status, reason, rating, comment) {
             document.getElementById('editRowIndex').value = rowIndex;
             document.getElementById('editUser').value = user;
@@ -840,10 +849,8 @@
             a.click();
         }
 
-        // Initial Load
         loadLiveVotes(false);
 
-        // Auto Refresh
         setInterval(() => {
             loadLiveVotes(true);
         }, AUTO_REFRESH_INTERVAL);
