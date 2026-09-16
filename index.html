@@ -386,7 +386,7 @@
         async function submitResponse(statusValue) {
             const userName = document.getElementById('userName').value.trim();
             const session = document.getElementById('sessionSelect').value;
-            const reason = document.getElementById('cantReason').value.trim();
+            const reasonInput = document.getElementById('cantReason').value.trim();
             const rating = document.getElementById('userRating').value;
             const comment = document.getElementById('userComment').value.trim();
             const alertBox = document.getElementById('statusAlert');
@@ -398,7 +398,7 @@
                 return;
             }
 
-            if (statusValue === "Can't Attend" && !reason) {
+            if (statusValue.toLowerCase().includes("can't") && !reasonInput) {
                 alertBox.className = "status-msg status-error";
                 alertBox.innerText = "Please state your reason for missing the session.";
                 alertBox.style.display = "block";
@@ -411,9 +411,6 @@
             alertBox.innerText = "Submitting your response...";
             alertBox.style.display = "block";
 
-            const reasonValue = statusValue === "Can't Attend" ? reason : "";
-
-            // Key mapping aliases to guarantee Apps Script captures the reason column
             const payload = {
                 user: userName,
                 participant: userName,
@@ -421,10 +418,10 @@
                 session: session,
                 status: statusValue,
                 response: statusValue,
-                reason: reasonValue,
-                cantReason: reasonValue,
-                cant_reason: reasonValue,
-                "Can't Join Reason": reasonValue,
+                reason: reasonInput,
+                cantReason: reasonInput,
+                cant_reason: reasonInput,
+                "Can't Join Reason": reasonInput,
                 rating: rating,
                 comment: comment
             };
