@@ -3,204 +3,444 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CamTech Library Book Club</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>CamTech Book Club - Member RSVP</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        :root {
+            --camtech-navy: #183B70;
+            --camtech-navy-hover: #234E8C;
+            --camtech-light-blue: #EBF2FA;
+            --camtech-accent-blue: #C0D6F0;
+            --bg-sand: #F5F1EA;
+            --card-bg: #FFFFFF;
+            --text-dark: #2C3E50;
+            --text-muted: #70685C;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        
         body { 
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
-            background: #F5F1EA; 
-            color: #2C3E50; 
-            padding: 24px 16px; 
-            display: flex; 
+            background: var(--bg-sand); 
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
             justify-content: center;
+            align-items: flex-start;
+            padding: 16px;
         }
-        .container { 
-            width: 100%; 
-            max-width: 380px; 
-            background: #FAF7F2; 
-            border-radius: 20px; 
-            padding: 24px 20px; 
-            box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+
+        .app-container {
+            width: 100%;
+            max-width: 440px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid #EAE3D9;
+            overflow: hidden;
+        }
+
+        /* BRAND HEADER */
+        .brand-header {
+            background: var(--camtech-navy);
+            color: #FFFFFF;
+            padding: 16px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-logo {
+            height: 40px;
+            width: auto;
+            object-fit: contain;
+            background: #FFFFFF;
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+
+        .brand-title {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--camtech-accent-blue);
+            text-transform: uppercase;
+        }
+
+        .page-heading {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+
+        /* CONTENT FORM AREA */
+        .form-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #DCD4C8;
+            font-size: 13px;
+            color: var(--text-dark);
+            outline: none;
+            background: #FAF7F2;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: var(--camtech-navy);
+            background: #FFFFFF;
+        }
+
+        /* SESSION INFO CARD */
+        .session-info-card {
+            background: var(--camtech-light-blue);
+            border: 1px solid var(--camtech-accent-blue);
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .session-book-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--camtech-navy);
+            margin-bottom: 2px;
+        }
+
+        .session-book-author {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .session-meta-row {
+            font-size: 12px;
+            color: var(--camtech-navy);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* ACTION BUTTONS */
+        .vote-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .btn-vote {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.1s ease, background 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-vote:active { transform: scale(0.98); }
+
+        .btn-attend {
+            background: var(--camtech-navy);
+            color: #FFFFFF;
+        }
+        .btn-attend:hover { background: var(--camtech-navy-hover); }
+
+        .btn-cant {
+            background: #FFEBEE;
+            color: #C62828;
+            border: 1px solid #FFCDD2;
+        }
+        .btn-cant:hover { background: #FFCDD2; }
+
+        .btn-unsure {
+            background: #FFFDE7;
+            color: #F57F17;
+            border: 1px solid #FFF59D;
+        }
+        .btn-unsure:hover { background: #FFF59D; }
+
+        /* CONDITIONAL REASON & FEEDBACK SECTIONS */
+        .conditional-box {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            background: #FAF7F2;
+            padding: 12px;
+            border-radius: 10px;
             border: 1px solid #EAE3D9;
         }
-        
-        .brand-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-        .brand-logo { 
-            width: 24px; height: 24px; background: #1B4332; color: #FFF; 
-            border-radius: 50%; display: flex; align-items: center; 
-            justify-content: center; font-size: 12px; font-weight: 700; 
-        }
-        .brand-title { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; color: #556B2F; text-transform: uppercase; }
-        .page-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: #1B4332; margin-bottom: 20px; }
 
-        .event-card { 
-            background: #FFFFFF; 
-            border-radius: 14px; 
-            padding: 18px; 
-            border: 1px solid #EAE3D9; 
-            margin-bottom: 24px; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        .status-msg {
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            text-align: center;
+            display: none;
+            font-weight: 600;
         }
-        .card-label { font-size: 9px; font-weight: 700; letter-spacing: 0.8px; color: #8C8275; text-transform: uppercase; margin-bottom: 6px; }
-        .book-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: #1B4332; line-height: 1.3; }
-        .book-author { font-size: 12px; color: #70685C; margin-bottom: 16px; margin-top: 2px; }
-        
-        .meta-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #4A443C; margin-bottom: 8px; }
-        .meta-item:last-child { margin-bottom: 0; }
+        .status-success { background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
+        .status-error { background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; }
 
-        .section-heading { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; color: #1B4332; margin-bottom: 4px; }
-        .section-subtext { font-size: 12px; color: #70685C; margin-bottom: 16px; }
-        
-        .btn { 
-            width: 100%; padding: 13px 16px; border-radius: 10px; border: 1px solid transparent; 
-            font-size: 14px; font-weight: 600; cursor: pointer; text-align: left; 
-            margin-bottom: 10px; transition: all 0.2s ease;
+        .footer-credit {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-muted);
+            padding: 12px 20px 16px;
         }
-        .btn-attend { background: #1B4332; color: #FFFFFF; }
-        .btn-cant { background: #F7EFE8; color: #5D4037; border-color: #E8DCD1; }
-        .btn-unsure { background: #FFFBEA; color: #856404; border-color: #F5EBA6; }
-        
-        .user-pill {
-            background: #EAE3D9; color: #1B4332; padding: 6px 12px; 
-            border-radius: 20px; font-size: 12px; font-weight: 600; 
-            display: inline-block; margin-bottom: 12px;
-        }
-
-        .form-group { margin-bottom: 16px; }
-        label { font-size: 10px; font-weight: 700; color: #8C8275; letter-spacing: 0.6px; display: block; margin-bottom: 6px; text-transform: uppercase; }
-        select { 
-            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #DCD4C8; 
-            background: #FFFFFF; font-size: 13px; color: #2C3E50; outline: none;
-        }
-        .footer-note { font-size: 10px; color: #9E9486; text-align: center; margin-top: 20px; }
-
-        .success-box { text-align: center; padding: 20px 10px; }
-        .check-circle { 
-            width: 48px; height: 48px; background: #E8F5E9; color: #2E7D32; 
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            margin: 0 auto 16px auto; font-size: 22px;
-        }
-        .response-badge { 
-            display: inline-block; background: #E8F5E9; color: #1B4332; 
-            padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-top: 8px;
-        }
-        .quote-footer { font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: #70685C; text-align: center; margin-top: 24px; }
-        .brand-footer { font-size: 9px; font-weight: 700; letter-spacing: 1px; color: #A09688; text-align: center; margin-top: 12px; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-    <div class="container" id="app">
+    <div class="app-container">
+        <!-- HEADER -->
         <div class="brand-header">
-            <div class="brand-logo">C</div>
+            <img src="camtech_logo.png" alt="CamTech Logo" class="header-logo" onerror="this.style.display='none'">
             <div class="brand-title">CamTech Library Book Club</div>
-        </div>
-        
-        <h1 class="page-title">Weekly Reading & Discussion</h1>
-
-        <div class="form-group">
-            <label for="meetingWeek">SELECT MEETING WEEK</label>
-            <select id="meetingWeek">
-                <option value="Friday, September 18, 2026">Week 1: Friday, Sep 18, 2026</option>
-                <option value="Friday, September 25, 2026">Week 2: Friday, Sep 25, 2026</option>
-                <option value="Friday, October 02, 2026">Week 3: Friday, Oct 02, 2026</option>
-                <option value="Friday, October 09, 2026">Week 4: Friday, Oct 09, 2026</option>
-            </select>
+            <div class="page-heading">Weekly Reading & Discussion</div>
         </div>
 
-        <div class="event-card">
-            <div class="card-label">Currently Reading</div>
-            <div class="book-title">"The Library of Babel & Other Stories"</div>
-            <div class="book-author">by Jorge Luis Borges</div>
+        <!-- FORM CONTENT -->
+        <div class="form-content">
+            
+            <div class="form-group">
+                <label class="form-label" for="userName">Your Full Name</label>
+                <input type="text" id="userName" class="form-input" placeholder="e.g. Sokha Chan" required>
+            </div>
 
-            <div class="meta-item">📅 <span id="displayDate">Friday, September 18, 2026</span></div>
-            <div class="meta-item">🕒 <span>3:30 PM - 5:00 PM</span></div>
-            <div class="meta-item">📍 <span>CamTech Library Reading Lobby</span></div>
+            <div class="form-group">
+                <label class="form-label" for="sessionSelect">Select Session</label>
+                <select id="sessionSelect" class="form-select" onchange="onSessionSelectChange()">
+                    <option value="Session 11">Session 11</option>
+                </select>
+            </div>
+
+            <!-- DYNAMIC BOOK DISPLAY -->
+            <div class="session-info-card">
+                <div class="session-book-title" id="bookTitle">"The Library of Babel & Other Stories"</div>
+                <div class="session-book-author" id="bookAuthor">by Jorge Luis Borges</div>
+                <div class="session-meta-row">🕒 <span id="sessionTime">3:30 PM - 5:00 PM</span></div>
+                <div class="session-meta-row">📍 <span id="sessionLocation">CamTech University, lobby</span></div>
+            </div>
+
+            <label class="form-label">Will you join us?</label>
+            
+            <div class="vote-options">
+                <button type="button" class="btn-vote btn-attend" onclick="submitResponse('I\'ll Attend')">
+                    ✅ I'll Attend
+                </button>
+                <button type="button" class="btn-vote btn-cant" onclick="showCantReasonBox()">
+                    ❌ Can't Attend
+                </button>
+                <button type="button" class="btn-vote btn-unsure" onclick="submitResponse('Not Sure Yet')">
+                    🤔 Not Sure Yet
+                </button>
+            </div>
+
+            <!-- UNABLE TO ATTEND REASON FIELD -->
+            <div class="conditional-box" id="cantReasonBox">
+                <label class="form-label" for="cantReason">Reason for missing session:</label>
+                <input type="text" id="cantReason" class="form-input" placeholder="e.g. Class conflict, traveling...">
+                <button type="button" class="btn-vote btn-cant" onclick="submitResponse('Can\'t Attend')">
+                    Confirm Submission
+                </button>
+            </div>
+
+            <!-- OPTIONAL FEEDBACK & RATING -->
+            <div class="conditional-box" id="feedbackBox" style="display: flex;">
+                <label class="form-label">Optional Feedback / Rating</label>
+                <select id="userRating" class="form-select">
+                    <option value="">Rate past session (Optional)</option>
+                    <option value="5 ⭐">5 ⭐ - Excellent</option>
+                    <option value="4 ⭐">4 ⭐ - Very Good</option>
+                    <option value="3 ⭐">3 ⭐ - Good</option>
+                    <option value="2 ⭐">2 ⭐ - Average</option>
+                    <option value="1 ⭐">1 ⭐ - Needs Improvement</option>
+                </select>
+                <input type="text" id="userComment" class="form-input" placeholder="Comments or book recommendations...">
+            </div>
+
+            <div id="statusAlert" class="status-msg"></div>
+
         </div>
 
-        <div id="userInfo"></div>
-
-        <div class="section-heading">Will you join us?</div>
-        <div class="section-subtext">Please confirm your participation. It only takes one click.</div>
-
-        <button class="btn btn-attend" onclick="submitRSVP('I\'ll Attend')">✓ I'll Attend</button>
-        <button class="btn btn-cant" onclick="submitRSVP('Can\'t Attend')">◯ I Can't Attend</button>
-        <button class="btn btn-unsure" onclick="submitRSVP('Not Sure Yet')">? Not Sure Yet</button>
-
-        <div id="fallbackSelect" class="form-group" style="display: none; margin-top: 14px;">
-            <label for="memberName">NAME (Browser Test Mode)</label>
-            <select id="memberName">
-                <option value="Dr. Elizabeth Vance">Dr. Elizabeth Vance</option>
-                <option value="Julian Archer">Julian Archer</option>
-                <option value="Miriam Sterling">Miriam Sterling</option>
-                <option value="Arthur Pendelton">Arthur Pendelton</option>
-            </select>
+        <div class="footer-credit">
+            CamTech University • Library Services Console
         </div>
-
-        <div class="footer-note">Your response is recorded automatically for library planning.</div>
     </div>
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2nvLYa1kNGijsg_XEqfW1lSdtsTUnOfBDrTkjL6GbyDsmPgKF2dI40rVu9ujQ9Xym/exec";
 
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+        let sessionDetailsMap = JSON.parse(localStorage.getItem('camtech_session_details')) || {
+            "Session 11": {
+                title: '"The Library of Babel & Other Stories"',
+                author: "by Jorge Luis Borges",
+                time: "3:30 PM - 5:00 PM",
+                location: "CamTech University, lobby"
+            }
+        };
 
-        let activeUser = "";
-
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            const u = tg.initDataUnsafe.user;
-            activeUser = `${u.first_name || ''} ${u.last_name || ''}`.trim();
-            document.getElementById('userInfo').innerHTML = `<div class="user-pill">👤 Member: ${activeUser}</div>`;
-        } else {
-            document.getElementById('fallbackSelect').style.display = 'block';
-        }
-
-        document.getElementById('meetingWeek').addEventListener('change', (e) => {
-            document.getElementById('displayDate').innerText = e.target.value;
+        // Initialize Telegram WebApp API if available
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.Telegram && window.Telegram.WebApp) {
+                const tg = window.Telegram.WebApp;
+                tg.ready();
+                tg.expand();
+                
+                if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                    const u = tg.initDataUnsafe.user;
+                    const fullName = `${u.first_name || ''} ${u.last_name || ''}`.trim();
+                    if (fullName) {
+                        document.getElementById('userName').value = fullName;
+                    }
+                }
+            }
+            loadSessionsFromBackend();
         });
 
-        function submitRSVP(status) {
-            if (!activeUser) {
-                const selectEl = document.getElementById('memberName');
-                activeUser = selectEl ? selectEl.value : "Member";
-            }
-
-            const meetingDate = document.getElementById('meetingWeek').value;
-
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user: activeUser, status: status, meetingDate: meetingDate })
-            });
-
-            if (tg.sendData) {
-                tg.sendData(JSON.stringify({ user: activeUser, status: status, meetingDate: meetingDate }));
-            }
-
-            document.getElementById('app').innerHTML = `
-                <div class="brand-header">
-                    <div class="brand-logo">C</div>
-                    <div class="brand-title">CamTech Library Book Club</div>
-                </div>
+        async function loadSessionsFromBackend() {
+            try {
+                const res = await fetch(SCRIPT_URL);
+                const data = await res.json();
                 
-                <h1 class="page-title">Weekly Reading & Discussion</h1>
+                const sessions = new Set(Object.keys(sessionDetailsMap));
+                data.forEach(item => {
+                    if (item.session) {
+                        const cleanSess = item.session.split(" (")[0].trim();
+                        sessions.add(cleanSess);
+                    }
+                });
 
-                <div class="event-card success-box">
-                    <div class="check-circle">✓</div>
-                    <h2 style="font-family: 'Playfair Display', serif; font-size: 20px; color: #1B4332; margin-bottom: 6px;">Thank you, ${activeUser}!</h2>
-                    <p style="font-size: 12px; color: #70685C;">Your response for ${meetingDate} has been recorded</p>
-                    <div style="margin-top: 14px;">
-                        <span class="response-badge">Your response: ${status}</span>
-                    </div>
-                </div>
+                const select = document.getElementById('sessionSelect');
+                select.innerHTML = '';
+                Array.from(sessions).reverse().forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s;
+                    opt.innerText = s;
+                    select.appendChild(opt);
+                });
 
-                <div class="quote-footer">"See you at the Book Club!"</div>
-                <div class="brand-footer">CamTech Academic Library</div>
-            `;
+                onSessionSelectChange();
+            } catch (err) {
+                console.log("Using cached/default session details.");
+                onSessionSelectChange();
+            }
+        }
+
+        function onSessionSelectChange() {
+            const selected = document.getElementById('sessionSelect').value;
+            const details = sessionDetailsMap[selected];
+
+            if (details) {
+                document.getElementById('bookTitle').innerText = details.title;
+                document.getElementById('bookAuthor').innerText = details.author;
+                document.getElementById('sessionTime').innerText = details.time;
+                document.getElementById('sessionLocation').innerText = details.location;
+            } else {
+                document.getElementById('bookTitle').innerText = '"The Library of Babel & Other Stories"';
+                document.getElementById('bookAuthor').innerText = 'by Jorge Luis Borges';
+                document.getElementById('sessionTime').innerText = '3:30 PM - 5:00 PM';
+                document.getElementById('sessionLocation').innerText = 'CamTech University, lobby';
+            }
+        }
+
+        function showCantReasonBox() {
+            const box = document.getElementById('cantReasonBox');
+            box.style.display = box.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        async function submitResponse(statusValue) {
+            const userName = document.getElementById('userName').value.trim();
+            const session = document.getElementById('sessionSelect').value;
+            const reason = document.getElementById('cantReason').value.trim();
+            const rating = document.getElementById('userRating').value;
+            const comment = document.getElementById('userComment').value.trim();
+            const alertBox = document.getElementById('statusAlert');
+
+            if (!userName) {
+                alertBox.className = "status-msg status-error";
+                alertBox.innerText = "Please enter your full name before submitting.";
+                alertBox.style.display = "block";
+                return;
+            }
+
+            if (statusValue === "Can't Attend" && !reason) {
+                alertBox.className = "status-msg status-error";
+                alertBox.innerText = "Please state your reason for missing the session.";
+                alertBox.style.display = "block";
+                return;
+            }
+
+            alertBox.className = "status-msg";
+            alertBox.style.background = "#EBF2FA";
+            alertBox.style.color = "#183B70";
+            alertBox.innerText = "Submitting your response...";
+            alertBox.style.display = "block";
+
+            const payload = {
+                user: userName,
+                session: session,
+                status: statusValue,
+                reason: statusValue === "Can't Attend" ? reason : "",
+                rating: rating,
+                comment: comment
+            };
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                alertBox.className = "status-msg status-success";
+                alertBox.innerText = `✅ Thank you, ${userName}! Your RSVP (${statusValue}) has been recorded.`;
+                document.getElementById('cantReasonBox').style.display = 'none';
+
+                if (window.Telegram && window.Telegram.WebApp) {
+                    setTimeout(() => {
+                        window.Telegram.WebApp.close();
+                    }, 2000);
+                }
+            } catch (err) {
+                alertBox.className = "status-msg status-error";
+                alertBox.innerText = "Submission error. Please check your connection and try again.";
+            }
         }
     </script>
 </body>
