@@ -281,6 +281,11 @@
 
     <div class="dashboard-container">
 
+        <div id="setupNeededBanner" class="status-alert-banner banner-canceled" style="display:none;">
+            <span id="setupNeededText">⚠️ This week's session hasn't been set up yet.</span>
+            <button class="btn-add-session" style="background:#C62828;" onclick="openEditSessionModalForActive()">Set it up now</button>
+        </div>
+
         <div id="statusBanner" class="status-alert-banner banner-confirmed">
             <span id="statusBannerText">Checking session status...</span>
             <span id="statusPercentage" style="font-size: 12px; opacity: 0.8;"></span>
@@ -500,6 +505,15 @@
                     activeSessionFromBackend = data.activeSession;
                 }
 
+                const setupBanner = document.getElementById('setupNeededBanner');
+                if (data.activeNeedsSetup) {
+                    document.getElementById('setupNeededText').innerText =
+                        `⚠️ ${activeSessionFromBackend || 'This week\'s session'} hasn't been set up yet — members can't see a book title.`;
+                    setupBanner.style.display = 'flex';
+                } else {
+                    setupBanner.style.display = 'none';
+                }
+
                 updateDynamicSessionDropdown();
                 renderTable();
                 
@@ -702,6 +716,15 @@
             document.getElementById('telegramCheckboxContainer').style.display = "flex";
 
             document.getElementById('addSessionModal').style.display = 'flex';
+        }
+
+        function openEditSessionModalForActive() {
+            const select = document.getElementById('filterSession');
+            if (activeSessionFromBackend && select.querySelector(`option[value="${activeSessionFromBackend}"]`)) {
+                select.value = activeSessionFromBackend;
+                onSessionChange();
+            }
+            openEditSessionModal();
         }
 
         function openEditSessionModal() {
