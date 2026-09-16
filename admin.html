@@ -646,9 +646,11 @@
 
         async function fetchSessionDetails() {
             try {
-                const res = await fetch(SCRIPT_URL + "?action=getDetails");
-                sessionDetailsMap = await res.json();
-                updateDynamicSessionDropdown();
+                const res = await fetch(SCRIPT_URL + "?action=getDetails&t=" + Date.now());
+                const data = await res.json();
+                
+                sessionDetailsMap = data.details || {};
+                updateDynamicSessionDropdown(data.latestSession);
             } catch (err) {
                 console.error("Failed to load session details", err);
             }
@@ -705,30 +707,38 @@
             return sessionStr.split(" (")[0].trim();
         }
 
-        function updateDynamicSessionDropdown() {
+        function updateDynamicSessionDropdown(preferredSession) {
             const select = document.getElementById('filterSession');
-            const currentValue = select.value;
-            
             const sessions = new Set();
-            Object.keys(sessionDetailsMap).forEach(s => sessions.add(s));
             
+            Object.keys(sessionDetailsMap).forEach(s => sessions.add(s));
             allVotes.forEach(vote => {
                 if (vote.session) {
                     sessions.add(extractSessionName(vote.session));
                 }
             });
 
+            if (sessions.size === 0) sessions.add("Session 11");
+
             let optionsHTML = `<option value="ALL">All Sessions</option>`;
-            Array.from(sessions).reverse().forEach(sess => {
+            const sorted = Array.from(sessions).sort((a, b) => {
+                const numA = parseInt(a.replace(/\D/g, '')) || 0;
+                const numB = parseInt(b.replace(/\D/g, '')) || 0;
+                return numB - numA;
+            });
+
+            sorted.forEach(sess => {
                 optionsHTML += `<option value="${sess}">${sess}</option>`;
             });
 
             select.innerHTML = optionsHTML;
-            if (currentValue && select.querySelector(`option[value="${currentValue}"]`)) {
-                select.value = currentValue;
-            } else if (select.options.length > 1) {
-                select.selectedIndex = 1;
+
+            if (preferredSession && select.querySelector(`option[value="${preferredSession}"]`)) {
+                select.value = preferredSession;
+            } else if (sorted.length > 0) {
+                select.value = sorted[0];
             }
+
             updateSideCardBookInfo();
         }
 
