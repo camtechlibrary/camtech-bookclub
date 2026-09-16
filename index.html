@@ -10,7 +10,7 @@
         :root {
             --camtech-navy: #183B70;
             --camtech-navy-hover: #234E8C;
-            --camtech-light-blue: #EBF2FA;
+            --camtech-light-blue: #EBF2FA; 
             --camtech-accent-blue: #C0D6F0;
             --bg-sand: #F5F1EA;
             --card-bg: #FFFFFF;
@@ -226,7 +226,7 @@
                 <div class="session-meta-row">📍 <span id="sessionLocation">CamTech University, lobby</span></div>
             </div>
 
-            <div class="conditional-box" id="feedbackBox" style="display: flex;">
+            <div class="conditional-box" id="feedbackBox">
                 <label class="form-label">Optional Feedback / Rating</label>
                 <select id="userRating" class="form-select">
                     <option value="">Rate past session (Optional)</option>
@@ -273,6 +273,7 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2nvLYa1kNGijsg_XEqfW1lSdtsTUnOfBDrTkjL6GbyDsmPgKF2dI40rVu9ujQ9Xym/exec";
         let sessionDetailsMap = {};
         let activeSessionName = "";
+        let activeSessionNeedsSetup = false;
 
         window.addEventListener('DOMContentLoaded', () => {
             if (window.Telegram && window.Telegram.WebApp) {
@@ -295,6 +296,7 @@
                 
                 sessionDetailsMap = data.details || {};
                 activeSessionName = data.activeSession || Object.keys(sessionDetailsMap)[0] || "Session 11";
+                activeSessionNeedsSetup = !!data.activeNeedsSetup;
 
                 const select = document.getElementById('sessionSelect');
                 select.innerHTML = '';
@@ -323,7 +325,17 @@
             const selected = document.getElementById('sessionSelect').value;
             const details = sessionDetailsMap[selected];
 
-            if (details) {
+            const feedbackBox = document.getElementById('feedbackBox');
+            feedbackBox.style.display = (selected !== activeSessionName) ? 'flex' : 'none';
+
+            const needsSetup = selected === activeSessionName && activeSessionNeedsSetup;
+
+            if (needsSetup) {
+                document.getElementById('bookTitle').innerText = "Book pick coming soon";
+                document.getElementById('bookAuthor').innerText = "The librarian hasn't added this week's book yet — check back soon!";
+                document.getElementById('sessionTime').innerText = (details && details.time) || "3:30 PM - 5:00 PM";
+                document.getElementById('sessionLocation').innerText = (details && details.location) || "CamTech University, lobby";
+            } else if (details) {
                 document.getElementById('bookTitle').innerText = details.title || "No Title Set";
                 document.getElementById('bookAuthor').innerText = details.author || "";
                 document.getElementById('sessionTime').innerText = details.time || "3:30 PM - 5:00 PM";
