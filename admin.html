@@ -4,53 +4,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CamTech Library System - Librarian Console</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --camtech-navy: #183B70;
-            --camtech-navy-hover: #234E8C;
+            --camtech-navy-hover: #122B53;
             --camtech-light-blue: #EBF2FA;
             --camtech-accent-blue: #C0D6F0;
+            --camtech-gold: #D4AF37;
             --bg-sand: #F5F1EA;
-            --card-bg: #FAF7F2;
+            --card-bg: #FFFFFF;
             --text-dark: #2C3E50;
             --text-muted: #70685C;
+            --border-color: #EAE3D9;
+            --success-bg: #E8F5E9;
+            --success-color: #2E7D32;
+            --error-bg: #FFEBEE;
+            --error-color: #C62828;
+            --warning-bg: #FFFDE7;
+            --warning-color: #F57F17;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --radius-sm: 8px;
+            --transition-speed: 0.25s;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        
         body { 
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
             background: var(--bg-sand); 
-            color: var(--text-dark); 
+            color: var(--text-dark);
+            min-height: 100vh;
+            padding-bottom: 40px;
         }
 
         /* NAVBAR WITH CAMTECH BRANDING */
         .top-navbar {
-            background: var(--camtech-navy);
+            background: linear-gradient(135deg, var(--camtech-navy) 0%, #0F284C 100%);
             color: #FFFFFF;
-            padding: 10px 28px;
+            padding: 12px 28px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 13px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 16px rgba(24, 59, 112, 0.12);
         }
         .nav-brand { display: flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: 0.8px; }
         
-        /* Logo Image Container */
         .nav-logo {
-            height: 36px;
+            height: 38px;
             width: auto;
             object-fit: contain;
             background: #FFFFFF;
-            padding: 4px 8px;
-            border-radius: 6px;
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
         .nav-title { font-size: 12px; color: var(--camtech-accent-blue); text-transform: uppercase; letter-spacing: 0.6px; display: flex; align-items: center; gap: 8px; }
 
         .live-dot {
-            width: 8px; height: 8px; background-color: #2ECC71; border-radius: 50%; display: inline-block;
+            width: 9px; height: 9px; background-color: #2ECC71; border-radius: 50%; display: inline-block;
             box-shadow: 0 0 0 0 rgba(46, 204, 113, 1);
             animation: pulse-green 2s infinite;
         }
@@ -61,25 +76,30 @@
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
         }
 
+        /* MAIN LAYOUT */
         .dashboard-container {
-            max-width: 1300px;
-            margin: 28px auto;
-            padding: 0 24px;
+            max-width: 1340px;
+            margin: 24px auto;
+            padding: 0 20px;
         }
 
+        /* STATUS BANNER */
         .status-alert-banner {
-            padding: 12px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            padding: 14px 20px;
+            border-radius: var(--radius-md);
+            margin-bottom: 24px;
             font-size: 14px;
             font-weight: 600;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            transition: all 0.3s ease;
         }
         .banner-confirmed { background: var(--camtech-light-blue); color: var(--camtech-navy); border: 1px solid var(--camtech-accent-blue); }
-        .banner-canceled { background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; }
+        .banner-canceled { background: var(--error-bg); color: var(--error-color); border: 1px solid #FFCDD2; }
 
+        /* HEADER ROW & METRICS */
         .header-row {
             display: flex;
             justify-content: space-between;
@@ -88,42 +108,45 @@
             flex-wrap: wrap;
             gap: 16px;
         }
-        .page-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--camtech-navy); }
-        .page-subtext { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+        .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--camtech-navy); }
+        .page-subtext { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
 
         .week-selector-card {
             background: #FFFFFF;
-            border: 1px solid #EAE3D9;
+            border: 1px solid var(--border-color);
             padding: 8px 14px;
-            border-radius: 10px;
+            border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             gap: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
         }
-        .week-selector-card label { font-size: 11px; font-weight: 700; color: #8C8275; text-transform: uppercase; }
+        .week-selector-card label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
         .week-selector-card select {
-            padding: 6px 12px;
-            border-radius: 6px;
+            padding: 7px 12px;
+            border-radius: var(--radius-sm);
             border: 1px solid #DCD4C8;
             font-size: 13px;
             color: var(--camtech-navy);
             font-weight: 600;
             outline: none;
+            background: #FAF7F2;
+            cursor: pointer;
         }
 
         .btn-add-session {
             background: var(--camtech-navy);
             color: #FFFFFF;
             border: none;
-            padding: 7px 14px;
-            border-radius: 6px;
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 5px;
-            transition: background 0.2s ease;
+            gap: 6px;
+            transition: background var(--transition-speed) ease;
         }
         .btn-add-session:hover { background: var(--camtech-navy-hover); }
 
@@ -131,123 +154,195 @@
             background: #EAE3D9;
             color: var(--camtech-navy);
             border: none;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 10px;
+            padding: 5px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
             font-weight: 700;
             cursor: pointer;
-            transition: background 0.2s ease;
+            transition: background var(--transition-speed) ease;
         }
         .btn-edit-side:hover { background: #DCD4C8; }
 
         .metrics-grid {
             display: flex;
-            gap: 14px;
+            gap: 12px;
+            flex-wrap: wrap;
         }
         .metric-card {
-            border-radius: 12px;
-            padding: 14px 20px;
-            min-width: 120px;
-            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: var(--radius-md);
+            padding: 12px 18px;
+            min-width: 110px;
+            border: 1px solid rgba(0,0,0,0.04);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            transition: transform 0.2s ease;
         }
+        .metric-card:hover { transform: translateY(-2px); }
         .metric-card.confirmed { background: var(--camtech-light-blue); color: var(--camtech-navy); }
-        .metric-card.cant { background: #FFEBEE; color: #C62828; }
-        .metric-card.unsure { background: #FFFDE7; color: #F57F17; }
+        .metric-card.cant { background: var(--error-bg); color: var(--error-color); }
+        .metric-card.unsure { background: var(--warning-bg); color: var(--warning-color); }
         .metric-card.no-response { background: #ECEFF1; color: #455A64; }
 
         .metric-label { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; }
-        .metric-value { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin-top: 6px; }
+        .metric-value { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; margin-top: 4px; }
 
+        /* GRID CONTENT AREA */
         .content-grid {
             display: grid;
             grid-template-columns: 320px 1fr;
-            gap: 24px;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .content-grid { grid-template-columns: 1fr; }
         }
 
         .side-card {
             background: var(--card-bg);
-            border-radius: 14px;
+            border-radius: var(--radius-lg);
             padding: 20px;
-            border: 1px solid #EAE3D9;
-            margin-bottom: 18px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         }
         .side-card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
-        .card-label { font-size: 9px; font-weight: 700; letter-spacing: 0.8px; color: #8C8275; text-transform: uppercase; }
-        .book-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: var(--camtech-navy); line-height: 1.3; }
-        .book-author { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; margin-top: 2px; }
-        .meta-item { font-size: 12px; color: #4A443C; margin-bottom: 8px; display: flex; gap: 8px; }
+        .card-label { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; color: var(--text-muted); text-transform: uppercase; }
+        .book-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--camtech-navy); line-height: 1.3; }
+        .book-author { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; margin-top: 2px; font-style: italic; }
+        .meta-item { font-size: 12.5px; color: #4A443C; margin-bottom: 8px; display: flex; gap: 8px; font-weight: 500; }
 
-        .tool-input-group { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .tool-input-group { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
         .tool-input-group label { font-size: 11px; font-weight: 600; color: var(--text-muted); }
-        .tool-input-group input { padding: 6px 10px; border-radius: 6px; border: 1px solid #DCD4C8; font-size: 12px; }
-        .calc-result { margin-top: 10px; font-size: 12px; font-weight: 600; color: var(--camtech-navy); background: var(--camtech-light-blue); padding: 8px; border-radius: 6px; }
+        .tool-input-group input { padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid #DCD4C8; font-size: 12px; outline: none; background: #FAF7F2; }
+        .calc-result { margin-top: 12px; font-size: 12px; font-weight: 600; color: var(--camtech-navy); background: var(--camtech-light-blue); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--camtech-accent-blue); }
 
+        /* TABLE CONTROLS & SEARCH */
+        .table-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .search-input-box {
+            position: relative;
+            flex: 1;
+            max-width: 320px;
+        }
+
+        .search-input-box input {
+            width: 100%;
+            padding: 8px 12px 8px 32px;
+            border-radius: var(--radius-sm);
+            border: 1px solid #DCD4C8;
+            font-size: 12px;
+            background: #FFFFFF;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .search-input-box input:focus {
+            border-color: var(--camtech-navy);
+            box-shadow: 0 0 0 2px rgba(24, 59, 112, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* TABLE VIEW */
         .table-card {
             background: #FFFFFF;
-            border-radius: 14px;
-            border: 1px solid #EAE3D9;
-            overflow-x: auto;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.03);
         }
+        
+        .table-responsive {
+            overflow-x: auto;
+            width: 100%;
+        }
+
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
         th { 
-            background: var(--card-bg); 
+            background: #FAF7F2; 
             padding: 12px 14px; 
             font-size: 10px; 
             font-weight: 700; 
-            color: #8C8275; 
+            color: var(--text-muted); 
             letter-spacing: 0.6px;
-            border-bottom: 1px solid #EAE3D9; 
+            border-bottom: 1px solid var(--border-color); 
             text-transform: uppercase;
         }
-        td { padding: 10px 14px; border-bottom: 1px solid #F2ECE4; color: var(--text-dark); }
+        td { padding: 12px 14px; border-bottom: 1px solid #F2ECE4; color: var(--text-dark); vertical-align: middle; }
         tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #FCFAF7; }
 
         .badge {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
             padding: 4px 8px;
             border-radius: 6px;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 600;
         }
         .badge-attend { background: var(--camtech-light-blue); color: var(--camtech-navy); }
-        .badge-cant { background: #FFEBEE; color: #C62828; }
-        .badge-unsure { background: #FFF8E1; color: #B78103; }
+        .badge-cant { background: var(--error-bg); color: var(--error-color); }
+        .badge-unsure { background: var(--warning-bg); color: var(--warning-color); }
         .badge-none { background: #ECEFF1; color: #546E7A; }
 
-        .btn-btn-group { display: flex; gap: 4px; }
-        .btn-edit { background: #EAE3D9; color: var(--camtech-navy); border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 600; }
-        .btn-delete { background: #FFEBEE; color: #C62828; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 600; }
+        .btn-btn-group { display: flex; gap: 6px; }
+        .btn-edit { background: #EAE3D9; color: var(--camtech-navy); border: none; padding: 5px 9px; border-radius: var(--radius-sm); cursor: pointer; font-size: 11px; font-weight: 600; transition: background 0.2s ease; }
+        .btn-edit:hover { background: #DCD4C8; }
+        .btn-delete { background: var(--error-bg); color: var(--error-color); border: none; padding: 5px 9px; border-radius: var(--radius-sm); cursor: pointer; font-size: 11px; font-weight: 600; transition: background 0.2s ease; }
+        .btn-delete:hover { background: #FFCDD2; }
 
+        /* FOOTER ACTIONS */
         .actions-footer {
-            margin-top: 24px;
+            margin-top: 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
         }
-        .actions-footer-buttons { display: flex; gap: 12px; }
+        .actions-footer-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
         .btn-action {
-            padding: 10px 18px;
-            border-radius: 8px;
-            font-size: 13px;
+            padding: 9px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             border: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
         }
         .btn-primary { background: var(--camtech-navy); color: #FFF; }
         .btn-primary:hover { background: var(--camtech-navy-hover); }
         .btn-secondary { background: #FFFFFF; color: var(--text-dark); border-color: #DCD4C8; }
+        .btn-secondary:hover { background: #FAF7F2; }
 
         /* MODAL STYLES */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(15, 40, 76, 0.4);
+            backdrop-filter: blur(2px);
             display: none;
             justify-content: center;
             align-items: center;
@@ -256,44 +351,94 @@
         .modal-card {
             background: #FFF;
             padding: 24px;
-            border-radius: 12px;
-            width: 440px;
-            max-width: 90%;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border-radius: var(--radius-lg);
+            width: 450px;
+            max-width: 92%;
+            box-shadow: 0 12px 36px rgba(0,0,0,0.15);
+            animation: modalSlide 0.25s ease-out;
         }
-        .modal-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--camtech-navy); margin-bottom: 16px; }
-        .modal-field { margin-bottom: 12px; }
-        .modal-field label { display: block; font-size: 11px; font-weight: 700; color: #8C8275; margin-bottom: 4px; text-transform: uppercase; }
-        .modal-field input, .modal-field select { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid #DCD4C8; font-size: 12px; outline: none; }
+
+        @keyframes modalSlide {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-title { font-family: 'Playfair Display', serif; font-size: 19px; color: var(--camtech-navy); margin-bottom: 16px; font-weight: 700; }
+        .modal-field { margin-bottom: 14px; }
+        .modal-field label { display: block; font-size: 10px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .modal-field input, .modal-field select { width: 100%; padding: 9px 12px; border-radius: var(--radius-sm); border: 1px solid #DCD4C8; font-size: 13px; outline: none; background: #FAF7F2; }
+        .modal-field input:focus, .modal-field select:focus { border-color: var(--camtech-navy); background: #FFF; }
         .modal-field-checkbox { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 12px; color: var(--camtech-navy); font-weight: 600; }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+
+        /* TOAST NOTIFICATIONS */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .toast {
+            padding: 12px 18px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            color: #FFF;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: toastIn 0.3s ease;
+        }
+        .toast-success { background: var(--camtech-navy); border-left: 4px solid #2ECC71; }
+        .toast-error { background: #C62828; border-left: 4px solid #FF8A80; }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .spinner-sm {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
     <div class="top-navbar">
         <div class="nav-brand">
-            <!-- CamTech Logo File (Replace src with your local filename or uploaded image URL) -->
             <img src="camtech_logo.png" alt="CamTech Logo" class="nav-logo" onerror="this.style.display='none'">
             <span>CAMTECH LIBRARY SYSTEM</span>
         </div>
         <div class="nav-title">
             <span class="live-dot"></span>
-            Librarian Console (Auto Sync)
+            Librarian Console
         </div>
     </div>
 
     <div class="dashboard-container">
 
+        <!-- STATUS ALERT BANNER -->
         <div id="statusBanner" class="status-alert-banner banner-confirmed">
             <span id="statusBannerText">Checking session status...</span>
-            <span id="statusPercentage" style="font-size: 12px; opacity: 0.8;"></span>
+            <span id="statusPercentage" style="font-size: 12px; opacity: 0.85;"></span>
         </div>
 
+        <!-- HEADER ROW -->
         <div class="header-row">
             <div>
                 <h1 class="page-title">Book Club Attendance</h1>
-                <div class="page-subtext">Session Management & Participant Feedback</div>
+                <div class="page-subtext">Session Management & Live Participant Feedback</div>
             </div>
 
             <div class="week-selector-card">
@@ -306,6 +451,7 @@
                 </button>
             </div>
 
+            <!-- METRICS GRID -->
             <div class="metrics-grid">
                 <div class="metric-card confirmed">
                     <div class="metric-label">Confirmed</div>
@@ -326,7 +472,10 @@
             </div>
         </div>
 
+        <!-- CONTENT GRID -->
         <div class="content-grid">
+            
+            <!-- LEFT PANEL -->
             <div>
                 <div class="side-card">
                     <div class="side-card-header">
@@ -342,11 +491,11 @@
                 </div>
 
                 <div class="side-card">
-                    <div class="card-label">📖 Page Reading Splitter Tool</div>
+                    <div class="card-label">📖 Page Reading Splitter</div>
                     <div class="tool-input-group">
-                        <label>Total Book Pages:</label>
+                        <label for="totalPages">Total Book Pages:</label>
                         <input type="number" id="totalPages" value="200" oninput="calculatePages()">
-                        <label>Total Members Joining (Auto-linked to Confirmed):</label>
+                        <label for="totalMembers">Joining Members (Auto-linked):</label>
                         <input type="number" id="totalMembers" value="0" oninput="calculatePages()">
                     </div>
                     <div class="calc-result" id="pageResult">
@@ -355,58 +504,74 @@
                 </div>
             </div>
 
+            <!-- RIGHT PANEL: TABLE & TOOLBAR -->
             <div>
+                <div class="table-toolbar">
+                    <div class="search-input-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="tableSearchInput" placeholder="Search participant or comment..." onkeyup="renderTable()">
+                    </div>
+                </div>
+
                 <div class="table-card">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Participant</th>
-                                <th>Session</th>
-                                <th>Response</th>
-                                <th>Can't Join Reason</th>
-                                <th>Rating</th>
-                                <th>Comment</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="attendanceTable">
-                            <tr>
-                                <td colspan="7" style="text-align: center; color: #8C8275; padding: 24px;">
-                                    Loading session data...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Participant</th>
+                                    <th>Session</th>
+                                    <th>Response</th>
+                                    <th>Can't Join Reason</th>
+                                    <th>Rating</th>
+                                    <th>Comment</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendanceTable">
+                                <tr>
+                                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 28px;">
+                                        Loading session data...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div class="actions-footer">
                     <div class="actions-footer-buttons">
-                        <button class="btn-action btn-primary" onclick="loadLiveVotes(false)">Refresh Data</button>
-                        <button class="btn-action btn-secondary" onclick="exportCSV()">Download CSV</button>
-                        <button class="btn-action btn-secondary" onclick="window.print()">Print Report</button>
+                        <button class="btn-action btn-primary" id="btnRefresh" onclick="loadLiveVotes(false)">
+                            <span id="refreshIcon">🔄</span> Refresh Data
+                        </button>
+                        <button class="btn-action btn-secondary" onclick="exportCSV()">📥 Export CSV</button>
+                        <button class="btn-action btn-secondary" onclick="window.print()">🖨️ Print Report</button>
                     </div>
-                    <div id="syncStatus" style="font-size: 11px; color: #8C8275;">Auto-syncing active (every 10s)</div>
+                    <div id="syncStatus" style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Auto-sync active (every 10s)</div>
                 </div>
             </div>
+
         </div>
     </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toastContainer" class="toast-container"></div>
 
     <!-- EDIT ENTRY MODAL -->
     <div class="modal-overlay" id="editModal">
         <div class="modal-card">
-            <div class="modal-title">Edit Entry</div>
+            <div class="modal-title">Edit Participant Entry</div>
             <input type="hidden" id="editRowIndex">
             
             <div class="modal-field">
-                <label>Participant Name</label>
+                <label for="editUser">Participant Name</label>
                 <input type="text" id="editUser">
             </div>
             <div class="modal-field">
-                <label>Session</label>
+                <label for="editSession">Session</label>
                 <input type="text" id="editSession">
             </div>
             <div class="modal-field">
-                <label>Response Status</label>
+                <label for="editStatus">Response Status</label>
                 <select id="editStatus">
                     <option value="I'll Attend">I'll Attend</option>
                     <option value="Can't Attend">Can't Attend</option>
@@ -414,15 +579,15 @@
                 </select>
             </div>
             <div class="modal-field">
-                <label>Can't Join Reason</label>
+                <label for="editReason">Can't Join Reason</label>
                 <input type="text" id="editReason">
             </div>
             <div class="modal-field">
-                <label>Rating</label>
+                <label for="editRating">Rating</label>
                 <input type="text" id="editRating" placeholder="e.g. 5 ⭐">
             </div>
             <div class="modal-field">
-                <label>Comment</label>
+                <label for="editComment">Comment</label>
                 <input type="text" id="editComment">
             </div>
 
@@ -439,28 +604,28 @@
             <div class="modal-title" id="sessionModalTitle">➕ Create New Book Session</div>
             
             <div class="modal-field">
-                <label>Session Name / Number</label>
+                <label for="newSessionName">Session Name / Number</label>
                 <input type="text" id="newSessionName" placeholder="e.g. Session 12">
             </div>
             <div class="modal-field">
-                <label>Book Title</label>
+                <label for="newBookTitle">Book Title</label>
                 <input type="text" id="newBookTitle" placeholder="e.g. The Library of Babel">
             </div>
             <div class="modal-field">
-                <label>Author Name</label>
+                <label for="newBookAuthor">Author Name</label>
                 <input type="text" id="newBookAuthor" placeholder="e.g. Jorge Luis Borges">
             </div>
             <div class="modal-field">
-                <label>Time & Schedule</label>
+                <label for="newSessionTime">Time & Schedule</label>
                 <input type="text" id="newSessionTime" value="3:30 PM - 5:00 PM">
             </div>
             <div class="modal-field">
-                <label>Location</label>
+                <label for="newSessionLocation">Location</label>
                 <input type="text" id="newSessionLocation" value="CamTech University, lobby">
             </div>
             <div class="modal-field-checkbox" id="telegramCheckboxContainer">
                 <input type="checkbox" id="broadcastTelegram" checked>
-                <label for="broadcastTelegram">Trigger Telegram Bot Announcement</label>
+                <label for="broadcastTelegram">Trigger Telegram Announcement</label>
             </div>
 
             <div class="modal-actions">
@@ -485,15 +650,30 @@
             }
         };
 
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerText = message;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
         async function loadLiveVotes(isSilent = false) {
             const editOpen = document.getElementById('editModal').style.display === 'flex';
             const addOpen = document.getElementById('addSessionModal').style.display === 'flex';
             if (isSilent && (editOpen || addOpen)) return;
 
             const tableBody = document.getElementById('attendanceTable');
+            const refreshIcon = document.getElementById('refreshIcon');
             
             if (!isSilent) {
-                tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #8C8275; padding: 24px;">Fetching live votes...</td></tr>`;
+                refreshIcon.className = "spinner-sm";
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 28px;">Fetching live responses...</td></tr>`;
             }
 
             try {
@@ -507,8 +687,12 @@
             } catch (err) {
                 console.error("Error fetching live data:", err);
                 if (!isSilent) {
-                    tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#C62828; padding:24px;">Error loading data. Click Refresh.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--error-color); padding: 28px;">Error connecting to server. Click Refresh.</td></tr>`;
+                    showToast("Failed to fetch live votes", "error");
                 }
+            } finally {
+                refreshIcon.className = "";
+                refreshIcon.innerText = "🔄";
             }
         }
 
@@ -576,15 +760,25 @@
 
         function renderTable() {
             const selectedSession = document.getElementById('filterSession').value;
+            const searchQuery = document.getElementById('tableSearchInput').value.toLowerCase().trim();
             const tableBody = document.getElementById('attendanceTable');
             document.getElementById('sideCardSession').innerText = selectedSession === "ALL" ? "All Sessions" : selectedSession;
 
-            const filtered = selectedSession === "ALL" 
+            let filtered = selectedSession === "ALL" 
                 ? allVotes 
                 : allVotes.filter(item => extractSessionName(item.session) === selectedSession);
 
+            if (searchQuery) {
+                filtered = filtered.filter(item => {
+                    const u = (item.user || '').toLowerCase();
+                    const c = (item.comment || '').toLowerCase();
+                    const r = (item.reason || '').toLowerCase();
+                    return u.includes(searchQuery) || c.includes(searchQuery) || r.includes(searchQuery);
+                });
+            }
+
             if (!filtered || filtered.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#8C8275; padding:24px;">No votes recorded for this session yet.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding:28px;">No participant records found.</td></tr>`;
                 updateMetricsAndBanner(0, 0, 0, 0);
                 return;
             }
@@ -601,23 +795,28 @@
                 const comment = item.comment || '—';
 
                 let badgeClass = 'badge-none';
+                let icon = '❓';
+
                 if (status === "I'll Attend") {
                     badgeClass = 'badge-attend';
+                    icon = '✅';
                     attend++;
                 } else if (status === "Can't Attend") {
                     badgeClass = 'badge-cant';
+                    icon = '❌';
                     cant++;
                 } else if (status.includes("Not Sure")) {
                     badgeClass = 'badge-unsure';
+                    icon = '🤔';
                     unsure++;
                 }
 
                 tableBody.innerHTML += `
                     <tr>
                         <td><strong>${user}</strong></td>
-                        <td style="font-size: 11px; color: #70685C;">${session}</td>
-                        <td><span class="badge ${badgeClass}">${status}</span></td>
-                        <td style="font-size: 11px; color: #C62828;">${reason}</td>
+                        <td style="font-size: 11px; color: var(--text-muted);">${session}</td>
+                        <td><span class="badge ${badgeClass}">${icon} ${status}</span></td>
+                        <td style="font-size: 11px; color: var(--error-color);">${reason}</td>
                         <td>${rating}</td>
                         <td style="font-size: 11px; color: #555;">${comment}</td>
                         <td>
@@ -652,7 +851,7 @@
 
             if (total === 0) {
                 banner.className = "status-alert-banner banner-confirmed";
-                bannerText.innerText = "ℹ️ Session created. Waiting for votes.";
+                bannerText.innerText = "ℹ️ Session created. Awaiting participant responses.";
                 statusPct.innerText = "";
                 return;
             }
@@ -662,10 +861,10 @@
 
             if (attendanceRate < 50) {
                 banner.className = "status-alert-banner banner-canceled";
-                bannerText.innerText = "🚨 MEETING CANCELED / POSTPONED: Attendance is currently below 50%.";
+                bannerText.innerText = "🚨 SESSION ALERT: Attendance threshold (<50%) is currently not met.";
             } else {
                 banner.className = "status-alert-banner banner-confirmed";
-                bannerText.innerText = "✅ MEETING CONFIRMED: Attendance requirement (>50%) is satisfied.";
+                bannerText.innerText = "✅ SESSION CONFIRMED: Attendance requirement (>50%) is satisfied.";
             }
         }
 
@@ -679,7 +878,7 @@
             }
 
             const perMember = Math.ceil(pages / members);
-            document.getElementById('pageResult').innerText = `Each member reads ~${perMember} pages (${pages} pages ÷ ${members} joining members).`;
+            document.getElementById('pageResult').innerText = `Each member reads ~${perMember} pages (${pages} total pages ÷ ${members} joining members).`;
         }
 
         function openAddSessionModal() {
@@ -713,7 +912,7 @@
                     select.value = selectedSession;
                     onSessionChange();
                 } else {
-                    alert("No session found to edit.");
+                    showToast("No session found to edit.", "error");
                     return;
                 }
             }
@@ -755,7 +954,7 @@
             const sendTelegram = document.getElementById('broadcastTelegram').checked;
 
             if (!sessionName) {
-                alert("Please specify a session name.");
+                showToast("Please specify a session name.", "error");
                 return;
             }
 
@@ -789,7 +988,7 @@
             select.value = sessionName;
             onSessionChange();
 
-            alert(isEditingSessionMode ? `✅ ${sessionName} details updated!` : `✅ ${sessionName} created!`);
+            showToast(isEditingSessionMode ? `${sessionName} details updated!` : `${sessionName} created successfully!`);
         }
 
         function openEditModal(rowIndex, user, session, status, reason, rating, comment) {
@@ -829,12 +1028,12 @@
                 body: JSON.stringify(payload)
             });
 
-            alert(`Record updated for ${payload.user}. Refreshing...`);
-            setTimeout(() => loadLiveVotes(false), 1000);
+            showToast(`Record updated for ${payload.user}`);
+            setTimeout(() => loadLiveVotes(false), 800);
         }
 
         async function deleteVote(rowIndex, userName) {
-            if (confirm(`Delete record for ${userName}?`)) {
+            if (confirm(`Are you sure you want to delete the record for ${userName}?`)) {
                 fetch(SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -842,8 +1041,8 @@
                     body: JSON.stringify({ action: 'delete', rowIndex: rowIndex })
                 });
 
-                alert(`Deleted ${userName}. Refreshing...`);
-                setTimeout(() => loadLiveVotes(false), 1000);
+                showToast(`Deleted record for ${userName}`);
+                setTimeout(() => loadLiveVotes(false), 800);
             }
         }
 
