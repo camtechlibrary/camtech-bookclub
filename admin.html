@@ -329,10 +329,10 @@
                         <div class="card-label">Currently Reading</div>
                         <button class="btn-edit-side" onclick="openEditSessionModal()">✏️ Edit Details</button>
                     </div>
-                    <div class="book-title" id="sideCardBookTitle">"The Library of Babel & Other Stories"</div>
-                    <div class="book-author" id="sideCardBookAuthor">by Jorge Luis Borges</div>
+                    <div class="book-title" id="sideCardBookTitle">Loading book title...</div>
+                    <div class="book-author" id="sideCardBookAuthor">...</div>
 
-                    <div class="meta-item">📅 <span id="sideCardSession">Session 11</span></div>
+                    <div class="meta-item">📅 <span id="sideCardSession">Session --</span></div>
                     <div class="meta-item">🕒 <span id="sideCardTime">3:30 PM - 5:00 PM</span></div>
                     <div class="meta-item">📍 <span id="sideCardLocation">CamTech University, lobby</span></div>
                 </div>
@@ -471,15 +471,9 @@
         const AUTO_REFRESH_INTERVAL = 10000;
         let allVotes = [];
         let isEditingSessionMode = false;
+        let activeSessionFromBackend = "";
 
-        let sessionDetailsMap = JSON.parse(localStorage.getItem('camtech_session_details')) || {
-            "Session 11": {
-                title: '"The Library of Babel & Other Stories"',
-                author: "by Jorge Luis Borges",
-                time: "3:30 PM - 5:00 PM",
-                location: "CamTech University, lobby"
-            }
-        };
+        let sessionDetailsMap = JSON.parse(localStorage.getItem('camtech_session_details')) || {};
 
         async function loadLiveVotes(isSilent = false) {
             const editOpen = document.getElementById('editModal').style.display === 'flex';
@@ -497,9 +491,13 @@
                 const data = await response.json();
                 allVotes = data.votes || (Array.isArray(data) ? data : []);
                 
+                // STEP 4 FIX: Sync dynamic session details live from Google Apps Script backend
                 if (data.details) {
-                    sessionDetailsMap = { ...sessionDetailsMap, ...data.details };
+                    sessionDetailsMap = data.details;
                     localStorage.setItem('camtech_session_details', JSON.stringify(sessionDetailsMap));
+                }
+                if (data.activeSession) {
+                    activeSessionFromBackend = data.activeSession;
                 }
 
                 updateDynamicSessionDropdown();
@@ -508,7 +506,7 @@
                 const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 document.getElementById('syncStatus').innerText = `Auto-synced at ${now}`;
             } catch (err) {
-                console.error("Error fetching live data:", err);
+                console.error("Dashboard sync error:", err);
                 if (!isSilent) {
                     tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#C62828; padding:24px;">Error loading data. Click Refresh.</td></tr>`;
                 }
@@ -516,7 +514,7 @@
         }
 
         function extractSessionName(sessionStr) {
-            if (!sessionStr) return "Session 11";
+            if (!sessionStr) return activeSessionFromBackend || "Session 11";
             return sessionStr.split(" (")[0].trim();
         }
 
@@ -542,7 +540,9 @@
             if (currentValue && select.querySelector(`option[value="${currentValue}"]`)) {
                 select.value = currentValue;
             } else if (select.options.length > 1) {
-                select.selectedIndex = 1;
+                select.value = activeSessionFromBackend && select.querySelector(`option[value="${activeSessionFromBackend}"]`)
+                    ? activeSessionFromBackend 
+                    : select.options[1].value;
             }
             updateSideCardBookInfo();
         }
@@ -552,28 +552,26 @@
             renderTable();
         }
 
+        // STEP 4 FIX: Dynamically populate book details without hardcoded fallbacks
         function updateSideCardBookInfo() {
             let selectedSession = document.getElementById('filterSession').value;
             
             if (selectedSession === "ALL") {
-                const select = document.getElementById('filterSession');
-                if (select.options.length > 1) {
-                    selectedSession = select.options[1].value;
-                }
+                selectedSession = activeSessionFromBackend || (document.getElementById('filterSession').options[1]?.value);
             }
 
-            const details = sessionDetailsMap[selectedSession];
+            const details = sessionDetailsMap[selectedSession] || sessionDetailsMap[activeSessionFromBackend];
 
             if (details) {
-                document.getElementById('sideCardBookTitle').innerText = details.title;
-                document.getElementById('sideCardBookAuthor').innerText = details.author;
-                document.getElementById('sideCardTime').innerText = details.time;
-                document.getElementById('sideCardLocation').innerText = details.location;
+                document.getElementById('sideCardBookTitle').innerText = details.title || "No Title Set";
+                document.getElementById('sideCardBookAuthor').innerText = details.author || "";
+                document.getElementById('sideCardTime').innerText = details.time || "3:30 PM - 5:00 PM";
+                document.getElementById('sideCardLocation').innerText = details.location || "CamTech University, lobby";
             } else {
-                document.getElementById('sideCardBookTitle').innerText = '"The Library of Babel & Other Stories"';
-                document.getElementById('sideCardBookAuthor').innerText = 'by Jorge Luis Borges';
-                document.getElementById('sideCardTime').innerText = '3:30 PM - 5:00 PM';
-                document.getElementById('sideCardLocation').innerText = 'CamTech University, lobby';
+                document.getElementById('sideCardBookTitle').innerText = "No Session Selected";
+                document.getElementById('sideCardBookAuthor').innerText = "";
+                document.getElementById('sideCardTime').innerText = "—";
+                document.getElementById('sideCardLocation').innerText = "—";
             }
         }
 
@@ -726,20 +724,15 @@
             document.getElementById('newSessionName').value = selectedSession;
             document.getElementById('newSessionName').disabled = true;
 
-            const details = sessionDetailsMap[selectedSession] || {
-                title: '"The Library of Babel & Other Stories"',
-                author: "by Jorge Luis Borges",
-                time: "3:30 PM - 5:00 PM",
-                location: "CamTech University, lobby"
-            };
+            const details = sessionDetailsMap[selectedSession] || {};
 
-            let cleanTitle = details.title.replace(/^"(.*)"$/, '$1');
-            let cleanAuthor = details.author.replace(/^by\s+/i, '');
+            let cleanTitle = (details.title || '').replace(/^"(.*)"$/, '$1');
+            let cleanAuthor = (details.author || '').replace(/^by\s+/i, '');
 
             document.getElementById('newBookTitle').value = cleanTitle;
             document.getElementById('newBookAuthor').value = cleanAuthor;
-            document.getElementById('newSessionTime').value = details.time;
-            document.getElementById('newSessionLocation').value = details.location;
+            document.getElementById('newSessionTime').value = details.time || "3:30 PM - 5:00 PM";
+            document.getElementById('newSessionLocation').value = details.location || "CamTech University, lobby";
             document.getElementById('telegramCheckboxContainer').style.display = "none";
 
             document.getElementById('addSessionModal').style.display = 'flex';
@@ -763,7 +756,7 @@
             }
 
             sessionDetailsMap[sessionName] = {
-                title: `"${bookTitle}"`,
+                title: `${bookTitle}`,
                 author: `by ${bookAuthor}`,
                 time: sessionTime,
                 location: sessionLocation
@@ -778,7 +771,7 @@
                 body: JSON.stringify({
                     action: 'updateSessionDetails',
                     session: sessionName,
-                    title: `"${bookTitle}"`,
+                    title: `${bookTitle}`,
                     author: `by ${bookAuthor}`,
                     time: sessionTime,
                     location: sessionLocation,
