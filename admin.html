@@ -24,7 +24,6 @@
             color: var(--text-dark); 
         }
 
-        /* NAVBAR WITH CAMTECH BRANDING */
         .top-navbar {
             background: var(--camtech-navy);
             color: #FFFFFF;
@@ -37,7 +36,6 @@
         }
         .nav-brand { display: flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: 0.8px; }
         
-        /* Logo Image Container */
         .nav-logo {
             height: 36px;
             width: auto;
@@ -243,7 +241,6 @@
         .btn-primary:hover { background: var(--camtech-navy-hover); }
         .btn-secondary { background: #FFFFFF; color: var(--text-dark); border-color: #DCD4C8; }
 
-        /* MODAL STYLES */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -273,7 +270,6 @@
 
     <div class="top-navbar">
         <div class="nav-brand">
-            <!-- CamTech Logo File (Replace src with your local filename or uploaded image URL) -->
             <img src="camtech_logo.png" alt="CamTech Logo" class="nav-logo" onerror="this.style.display='none'">
             <span>CAMTECH LIBRARY SYSTEM</span>
         </div>
@@ -498,7 +494,14 @@
 
             try {
                 const response = await fetch(SCRIPT_URL);
-                allVotes = await response.json();
+                const data = await response.json();
+                allVotes = data.votes || (Array.isArray(data) ? data : []);
+                
+                if (data.details) {
+                    sessionDetailsMap = { ...sessionDetailsMap, ...data.details };
+                    localStorage.setItem('camtech_session_details', JSON.stringify(sessionDetailsMap));
+                }
+
                 updateDynamicSessionDropdown();
                 renderTable();
                 
@@ -768,19 +771,20 @@
 
             localStorage.setItem('camtech_session_details', JSON.stringify(sessionDetailsMap));
 
-            if (!isEditingSessionMode && sendTelegram) {
-                fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'create_session',
-                        session: sessionName,
-                        bookTitle: bookTitle,
-                        bookAuthor: bookAuthor
-                    })
-                });
-            }
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'updateSessionDetails',
+                    session: sessionName,
+                    title: `"${bookTitle}"`,
+                    author: `by ${bookAuthor}`,
+                    time: sessionTime,
+                    location: sessionLocation,
+                    broadcastTelegram: sendTelegram
+                })
+            });
 
             closeAddSessionModal();
             updateDynamicSessionDropdown();
