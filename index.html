@@ -274,7 +274,7 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2nvLYa1kNGijsg_XEqfW1lSdtsTUnOfBDrTkjL6GbyDsmPgKF2dI40rVu9ujQ9Xym/exec";
         let sessionDetailsMap = {};
-        let activeSessionName = "Session 11";
+        let activeSessionName = "";
 
         window.addEventListener('DOMContentLoaded', () => {
             if (window.Telegram && window.Telegram.WebApp) {
@@ -296,7 +296,7 @@
                 const data = await res.json();
                 
                 sessionDetailsMap = data.details || {};
-                activeSessionName = data.activeSession || "Session 11";
+                activeSessionName = data.activeSession || Object.keys(sessionDetailsMap)[0] || "Session 11";
 
                 const select = document.getElementById('sessionSelect');
                 select.innerHTML = '';
@@ -323,17 +323,17 @@
 
         function onSessionSelectChange() {
             const selected = document.getElementById('sessionSelect').value;
-            const details = sessionDetailsMap[selected] || {
-                title: '"The Library of Babel & Other Stories"',
-                author: "by Jorge Luis Borges",
-                time: "3:30 PM - 5:00 PM",
-                location: "CamTech University, lobby"
-            };
+            const details = sessionDetailsMap[selected];
 
-            document.getElementById('bookTitle').innerText = details.title;
-            document.getElementById('bookAuthor').innerText = details.author;
-            document.getElementById('sessionTime').innerText = details.time;
-            document.getElementById('sessionLocation').innerText = details.location;
+            if (details) {
+                document.getElementById('bookTitle').innerText = details.title || "No Title Set";
+                document.getElementById('bookAuthor').innerText = details.author || "";
+                document.getElementById('sessionTime').innerText = details.time || "3:30 PM - 5:00 PM";
+                document.getElementById('sessionLocation').innerText = details.location || "CamTech University, lobby";
+            } else {
+                document.getElementById('bookTitle').innerText = "No Title Set";
+                document.getElementById('bookAuthor').innerText = "";
+            }
         }
 
         function toggleCantReasonBox() {
@@ -349,7 +349,8 @@
             const comment = document.getElementById('userComment').value.trim();
             const alertBox = document.getElementById('statusAlert');
 
-            if (!userName) {
+            // STRICT FIX 1: Reject empty, null, or undefined user names
+            if (!userName || userName.toLowerCase() === "undefined" || userName.toLowerCase() === "null") {
                 alertBox.className = "status-msg status-error";
                 alertBox.innerText = "Please enter your full name before submitting.";
                 alertBox.style.display = "block";
