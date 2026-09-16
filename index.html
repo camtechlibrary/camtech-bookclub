@@ -472,8 +472,8 @@
 
         async function loadSessionsFromBackend() {
             try {
-                // Fetch dynamic session details map directly from GAS backend
-                const resDetails = await fetch(SCRIPT_URL + "?action=getDetails");
+                // Cache-busting parameter prevents Telegram Web App browser from serving stale session details
+                const resDetails = await fetch(`${SCRIPT_URL}?action=getDetails&t=${Date.now()}`);
                 sessionDetailsMap = await resDetails.json();
             } catch (err) {
                 console.error("Could not fetch session details from backend:", err);
@@ -481,7 +481,7 @@
 
             try {
                 // Fetch responses to discover any additional logged sessions
-                const resVotes = await fetch(SCRIPT_URL);
+                const resVotes = await fetch(`${SCRIPT_URL}?t=${Date.now()}`);
                 const data = await resVotes.json();
                 
                 const sessions = new Set(Object.keys(sessionDetailsMap));
@@ -514,15 +514,35 @@
             }
         }
 
+        function getSessionDetails(sessionName) {
+            if (!sessionName) return null;
+            if (sessionDetailsMap[sessionName]) return sessionDetailsMap[sessionName];
+
+            // Fuzzy/clean lookup to match "Session 11" with "Session 11 (Date)" or vice versa
+            const cleanName = sessionName.split(" (")[0].trim();
+            if (sessionDetailsMap[cleanName]) return sessionDetailsMap[cleanName];
+
+            const matchKey = Object.keys(sessionDetailsMap).find(key => 
+                key.toLowerCase().trim() === cleanName.toLowerCase() ||
+                key.toLowerCase().trim() === sessionName.toLowerCase()
+            );
+
+            return matchKey ? sessionDetailsMap[matchKey] : null;
+        }
+
         function onSessionSelectChange() {
             const selected = document.getElementById('sessionSelect').value;
-            const details = sessionDetailsMap[selected];
+            const details = getSessionDetails(selected);
 
-            if (details) {
-                document.getElementById('bookTitle').innerText = details.title;
-                document.getElementById('bookAuthor').innerText = details.author;
-                document.getElementById('sessionTime').innerText = details.time;
-                document.getElementById('sessionLocation').innerText = details.location;
+            if (details && (details.title || details.author)) {
+                const rawTitle = (details.title || "Untitled").trim();
+                const rawAuthor = (details.author || "Unknown Author").trim();
+
+                // Format title with quotes and author with 'by ' prefix if needed
+                document.getElementById('bookTitle').innerText = rawTitle.startsWith('"') ? rawTitle : `"${rawTitle}"`;
+                document.getElementById('bookAuthor').innerText = rawAuthor.toLowerCase().startsWith('by ') ? rawAuthor : `by ${rawAuthor}`;
+                document.getElementById('sessionTime').innerText = details.time || "3:30 PM - 5:00 PM";
+                document.getElementById('sessionLocation').innerText = details.location || "CamTech University, lobby";
             } else {
                 document.getElementById('bookTitle').innerText = '"The Library of Babel & Other Stories"';
                 document.getElementById('bookAuthor').innerText = 'by Jorge Luis Borges';
