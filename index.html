@@ -2,24 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CamTech Book Club - Member RSVP</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --camtech-navy: #183B70;
-            --camtech-navy-hover: #234E8C;
+            --camtech-navy-hover: #122B53;
             --camtech-light-blue: #EBF2FA;
             --camtech-accent-blue: #C0D6F0;
+            --camtech-gold: #D4AF37;
             --bg-sand: #F5F1EA;
             --card-bg: #FFFFFF;
             --text-dark: #2C3E50;
             --text-muted: #70685C;
+            --border-color: #EAE3D9;
+            --success-bg: #E8F5E9;
+            --success-color: #2E7D32;
+            --error-bg: #FFEBEE;
+            --error-color: #C62828;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --radius-sm: 8px;
+            --transition-speed: 0.25s;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body { 
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
             background: var(--bg-sand); 
@@ -28,58 +43,67 @@
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            padding: 16px;
+            padding: 16px 12px;
         }
 
         .app-container {
             width: 100%;
             max-width: 440px;
             background: var(--card-bg);
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-            border: 1px solid #EAE3D9;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 8px 30px rgba(24, 59, 112, 0.08);
+            border: 1px solid var(--border-color);
             overflow: hidden;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* BRAND HEADER */
         .brand-header {
-            background: var(--camtech-navy);
+            background: linear-gradient(135deg, var(--camtech-navy) 0%, #0F284C 100%);
             color: #FFFFFF;
-            padding: 16px;
+            padding: 22px 16px 18px;
             text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            position: relative;
         }
 
         .header-logo {
-            height: 40px;
+            height: 42px;
             width: auto;
             object-fit: contain;
             background: #FFFFFF;
-            padding: 4px 10px;
-            border-radius: 8px;
+            padding: 4px 12px;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
 
         .brand-title {
             font-size: 11px;
             font-weight: 700;
-            letter-spacing: 1px;
+            letter-spacing: 1.2px;
             color: var(--camtech-accent-blue);
             text-transform: uppercase;
         }
 
         .page-heading {
             font-family: 'Playfair Display', serif;
-            font-size: 20px;
+            font-size: 21px;
             font-weight: 700;
             color: #FFFFFF;
+            letter-spacing: -0.2px;
         }
 
         /* CONTENT FORM AREA */
         .form-content {
-            padding: 20px;
+            padding: 20px 18px;
             display: flex;
             flex-direction: column;
             gap: 16px;
@@ -96,24 +120,25 @@
             font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
         }
 
         .form-input, .form-select, .form-textarea {
             width: 100%;
-            padding: 10px 12px;
-            border-radius: 8px;
+            padding: 11px 14px;
+            border-radius: var(--radius-sm);
             border: 1px solid #DCD4C8;
-            font-size: 13px;
+            font-size: 14px;
             color: var(--text-dark);
             outline: none;
             background: #FAF7F2;
-            transition: border-color 0.2s ease;
+            transition: all var(--transition-speed) ease;
         }
 
         .form-input:focus, .form-select:focus, .form-textarea:focus {
             border-color: var(--camtech-navy);
             background: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(24, 59, 112, 0.1);
         }
 
         /* SESSION INFO CARD */
@@ -121,105 +146,199 @@
             background: var(--camtech-light-blue);
             border: 1px solid var(--camtech-accent-blue);
             border-radius: 12px;
-            padding: 14px;
+            padding: 16px;
+            position: relative;
+            transition: transform 0.2s ease;
         }
 
         .session-book-title {
             font-family: 'Playfair Display', serif;
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 700;
             color: var(--camtech-navy);
             margin-bottom: 2px;
+            line-height: 1.3;
         }
 
         .session-book-author {
-            font-size: 12px;
+            font-size: 13px;
+            font-style: italic;
             color: var(--text-muted);
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+        }
+
+        .session-meta-group {
+            border-top: 1px solid rgba(24, 59, 112, 0.1);
+            padding-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
 
         .session-meta-row {
-            font-size: 12px;
+            font-size: 12.5px;
             color: var(--camtech-navy);
             display: flex;
             align-items: center;
-            gap: 6px;
-            margin-top: 4px;
+            gap: 8px;
             font-weight: 500;
         }
 
-        /* ACTION BUTTONS */
+        /* RSVP SELECTION BUTTONS */
         .vote-options {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            margin-top: 6px;
+            gap: 10px;
+            margin-top: 2px;
         }
 
         .btn-vote {
             width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 13px;
+            padding: 13px 16px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            border: none;
-            transition: transform 0.1s ease, background 0.2s ease;
+            border: 2px solid transparent;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
+            justify-content: flex-start;
+            gap: 10px;
+            background: #FAF7F2;
+            color: var(--text-dark);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
         .btn-vote:active { transform: scale(0.98); }
 
         .btn-attend {
-            background: var(--camtech-navy);
-            color: #FFFFFF;
+            border-color: #C2E0C6;
+            color: #1B5E20;
         }
-        .btn-attend:hover { background: var(--camtech-navy-hover); }
+        .btn-attend.active, .btn-attend:hover {
+            background: #E8F5E9;
+            border-color: #2E7D32;
+        }
 
         .btn-cant {
-            background: #FFEBEE;
+            border-color: #FFCDD2;
             color: #C62828;
-            border: 1px solid #FFCDD2;
         }
-        .btn-cant:hover { background: #FFCDD2; }
+        .btn-cant.active, .btn-cant:hover {
+            background: #FFEBEE;
+            border-color: #C62828;
+        }
 
         .btn-unsure {
-            background: #FFFDE7;
-            color: #F57F17;
-            border: 1px solid #FFF59D;
+            border-color: #FFF59D;
+            color: #E65100;
         }
-        .btn-unsure:hover { background: #FFF59D; }
+        .btn-unsure.active, .btn-unsure:hover {
+            background: #FFFDE7;
+            border-color: #F57F17;
+        }
 
-        /* CONDITIONAL REASON & FEEDBACK SECTIONS */
+        /* CONDITIONAL BOXES */
         .conditional-box {
             display: none;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
             background: #FAF7F2;
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid #EAE3D9;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            animation: slideDown 0.25s ease-out;
         }
 
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* STAR RATING COMPONENT */
+        .star-rating-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .star {
+            font-size: 24px;
+            color: #DCD4C8;
+            cursor: pointer;
+            transition: color 0.15s ease, transform 0.15s ease;
+        }
+
+        .star.selected, .star:hover {
+            color: var(--camtech-gold);
+            transform: scale(1.15);
+        }
+
+        /* PRIMARY SUBMIT BUTTON */
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            background: var(--camtech-navy);
+            color: #FFFFFF;
+            font-size: 14px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 4px 12px rgba(24, 59, 112, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .btn-submit:hover { background: var(--camtech-navy-hover); }
+        .btn-submit:active { transform: scale(0.98); }
+        .btn-submit:disabled {
+            background: #90A4AE;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* STATUS MESSAGES */
         .status-msg {
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 12px;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
             text-align: center;
             display: none;
             font-weight: 600;
+            line-height: 1.4;
         }
-        .status-success { background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
-        .status-error { background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; }
+        .status-success { background: var(--success-bg); color: var(--success-color); border: 1px solid #A5D6A7; }
+        .status-error { background: var(--error-bg); color: var(--error-color); border: 1px solid #FFCDD2; }
+        .status-info { background: var(--camtech-light-blue); color: var(--camtech-navy); border: 1px solid var(--camtech-accent-blue); }
 
         .footer-credit {
             text-align: center;
             font-size: 11px;
             color: var(--text-muted);
-            padding: 12px 20px 16px;
+            padding: 12px 20px 18px;
+            border-top: 1px dashed var(--border-color);
+            background: #FCFAF7;
+        }
+
+        /* SPINNER */
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -238,7 +357,7 @@
             
             <div class="form-group">
                 <label class="form-label" for="userName">Your Full Name</label>
-                <input type="text" id="userName" class="form-input" placeholder="e.g. Sokha Chan" required>
+                <input type="text" id="userName" class="form-input" placeholder="e.g. Sokha Chan" required autocomplete="name">
             </div>
 
             <div class="form-group">
@@ -252,46 +371,52 @@
             <div class="session-info-card">
                 <div class="session-book-title" id="bookTitle">"The Library of Babel & Other Stories"</div>
                 <div class="session-book-author" id="bookAuthor">by Jorge Luis Borges</div>
-                <div class="session-meta-row">🕒 <span id="sessionTime">3:30 PM - 5:00 PM</span></div>
-                <div class="session-meta-row">📍 <span id="sessionLocation">CamTech University, lobby</span></div>
+                <div class="session-meta-group">
+                    <div class="session-meta-row">🕒 <span id="sessionTime">3:30 PM - 5:00 PM</span></div>
+                    <div class="session-meta-row">📍 <span id="sessionLocation">CamTech University, lobby</span></div>
+                </div>
             </div>
 
             <label class="form-label">Will you join us?</label>
             
             <div class="vote-options">
-                <button type="button" class="btn-vote btn-attend" onclick="submitResponse('I\'ll Attend')">
-                    ✅ I'll Attend
+                <button type="button" id="btnAttend" class="btn-vote btn-attend" onclick="selectRsvp('I\'ll Attend')">
+                    <span>✅</span> <span>I'll Attend</span>
                 </button>
-                <button type="button" class="btn-vote btn-cant" onclick="showCantReasonBox()">
-                    ❌ Can't Attend
+                <button type="button" id="btnCant" class="btn-vote btn-cant" onclick="selectRsvp('Can\'t Attend')">
+                    <span>❌</span> <span>Can't Attend</span>
                 </button>
-                <button type="button" class="btn-vote btn-unsure" onclick="submitResponse('Not Sure Yet')">
-                    🤔 Not Sure Yet
+                <button type="button" id="btnUnsure" class="btn-vote btn-unsure" onclick="selectRsvp('Not Sure Yet')">
+                    <span>🤔</span> <span>Not Sure Yet</span>
                 </button>
             </div>
 
             <!-- UNABLE TO ATTEND REASON FIELD -->
             <div class="conditional-box" id="cantReasonBox">
-                <label class="form-label" for="cantReason">Reason for missing session:</label>
+                <label class="form-label" for="cantReason">Reason for missing session *</label>
                 <input type="text" id="cantReason" class="form-input" placeholder="e.g. Class conflict, traveling...">
-                <button type="button" class="btn-vote btn-cant" onclick="submitResponse('Can\'t Attend')">
-                    Confirm Submission
-                </button>
             </div>
 
             <!-- OPTIONAL FEEDBACK & RATING -->
             <div class="conditional-box" id="feedbackBox" style="display: flex;">
                 <label class="form-label">Optional Feedback / Rating</label>
-                <select id="userRating" class="form-select">
-                    <option value="">Rate past session (Optional)</option>
-                    <option value="5 ⭐">5 ⭐ - Excellent</option>
-                    <option value="4 ⭐">4 ⭐ - Very Good</option>
-                    <option value="3 ⭐">3 ⭐ - Good</option>
-                    <option value="2 ⭐">2 ⭐ - Average</option>
-                    <option value="1 ⭐">1 ⭐ - Needs Improvement</option>
-                </select>
+                
+                <div class="star-rating-container" id="starContainer">
+                    <span class="star" data-rating="1" onclick="setRating(1)">★</span>
+                    <span class="star" data-rating="2" onclick="setRating(2)">★</span>
+                    <span class="star" data-rating="3" onclick="setRating(3)">★</span>
+                    <span class="star" data-rating="4" onclick="setRating(4)">★</span>
+                    <span class="star" data-rating="5" onclick="setRating(5)">★</span>
+                </div>
+                <input type="hidden" id="userRating" value="">
+
                 <input type="text" id="userComment" class="form-input" placeholder="Comments or book recommendations...">
             </div>
+
+            <!-- SUBMIT BUTTON -->
+            <button type="button" id="submitBtn" class="btn-submit" onclick="submitResponse()">
+                <span id="btnText">Confirm RSVP</span>
+            </button>
 
             <div id="statusAlert" class="status-msg"></div>
 
@@ -305,25 +430,41 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2nvLYa1kNGijsg_XEqfW1lSdtsTUnOfBDrTkjL6GbyDsmPgKF2dI40rVu9ujQ9Xym/exec";
 
+        let selectedStatus = "";
+        let selectedRatingValue = "";
+        let tgUser = null;
+
         let sessionDetailsMap = JSON.parse(localStorage.getItem('camtech_session_details')) || {
             "Session 11": {
                 title: '"The Library of Babel & Other Stories"',
                 author: "by Jorge Luis Borges",
                 time: "3:30 PM - 5:00 PM",
                 location: "CamTech University, lobby"
+            },
+            "Session 10": {
+                title: '"Fahrenheit 451"',
+                author: "by Ray Bradbury",
+                time: "3:30 PM - 5:00 PM",
+                location: "CamTech Library, Room B"
             }
         };
 
-        // Initialize Telegram WebApp API if available
+        // Initialize Telegram WebApp API
         window.addEventListener('DOMContentLoaded', () => {
             if (window.Telegram && window.Telegram.WebApp) {
                 const tg = window.Telegram.WebApp;
                 tg.ready();
                 tg.expand();
-                
+
+                // Theme color syncing
+                try {
+                    tg.setHeaderColor('#183B70');
+                    tg.setBackgroundColor('#F5F1EA');
+                } catch (e) {}
+
                 if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                    const u = tg.initDataUnsafe.user;
-                    const fullName = `${u.first_name || ''} ${u.last_name || ''}`.trim();
+                    tgUser = tg.initDataUnsafe.user;
+                    const fullName = `${tgUser.first_name || ''} ${tgUser.last_name || ''}`.trim();
                     if (fullName) {
                         document.getElementById('userName').value = fullName;
                     }
@@ -332,18 +473,32 @@
             loadSessionsFromBackend();
         });
 
+        function triggerHaptic(type = 'impact') {
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
+                if (type === 'impact') {
+                    window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+                } else if (type === 'success') {
+                    window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+                } else if (type === 'error') {
+                    window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+                }
+            }
+        }
+
         async function loadSessionsFromBackend() {
             try {
                 const res = await fetch(SCRIPT_URL);
                 const data = await res.json();
                 
                 const sessions = new Set(Object.keys(sessionDetailsMap));
-                data.forEach(item => {
-                    if (item.session) {
-                        const cleanSess = item.session.split(" (")[0].trim();
-                        sessions.add(cleanSess);
-                    }
-                });
+                if (Array.isArray(data)) {
+                    data.forEach(item => {
+                        if (item.session) {
+                            const cleanSess = item.session.split(" (")[0].trim();
+                            sessions.add(cleanSess);
+                        }
+                    });
+                }
 
                 const select = document.getElementById('sessionSelect');
                 select.innerHTML = '';
@@ -356,7 +511,7 @@
 
                 onSessionSelectChange();
             } catch (err) {
-                console.log("Using cached/default session details.");
+                console.log("Using default session details.");
                 onSessionSelectChange();
             }
         }
@@ -378,52 +533,89 @@
             }
         }
 
-        function showCantReasonBox() {
-            const box = document.getElementById('cantReasonBox');
-            box.style.display = box.style.display === 'flex' ? 'none' : 'flex';
+        function selectRsvp(status) {
+            triggerHaptic('impact');
+            selectedStatus = status;
+
+            // Update UI classes
+            document.getElementById('btnAttend').classList.toggle('active', status === "I'll Attend");
+            document.getElementById('btnCant').classList.toggle('active', status === "Can't Attend");
+            document.getElementById('btnUnsure').classList.toggle('active', status === "Not Sure Yet");
+
+            // Toggle Reason Box
+            const cantBox = document.getElementById('cantReasonBox');
+            if (status === "Can't Attend") {
+                cantBox.style.display = 'flex';
+                document.getElementById('cantReason').focus();
+            } else {
+                cantBox.style.display = 'none';
+            }
         }
 
-        async function submitResponse(statusValue) {
+        function setRating(stars) {
+            triggerHaptic('impact');
+            selectedRatingValue = `${stars} ⭐`;
+            document.getElementById('userRating').value = selectedRatingValue;
+
+            const starElements = document.querySelectorAll('#starContainer .star');
+            starElements.forEach((star, idx) => {
+                if (idx < stars) {
+                    star.classList.add('selected');
+                } else {
+                    star.classList.remove('selected');
+                }
+            });
+        }
+
+        async function submitResponse() {
             const userName = document.getElementById('userName').value.trim();
             const session = document.getElementById('sessionSelect').value;
             const reasonInput = document.getElementById('cantReason').value.trim();
             const rating = document.getElementById('userRating').value;
             const comment = document.getElementById('userComment').value.trim();
             const alertBox = document.getElementById('statusAlert');
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
 
             if (!userName) {
-                alertBox.className = "status-msg status-error";
-                alertBox.innerText = "Please enter your full name before submitting.";
-                alertBox.style.display = "block";
+                triggerHaptic('error');
+                showAlert('status-error', "Please enter your full name before submitting.");
                 return;
             }
 
-            if (statusValue.toLowerCase().includes("can't") && !reasonInput) {
-                alertBox.className = "status-msg status-error";
-                alertBox.innerText = "Please state your reason for missing the session.";
-                alertBox.style.display = "block";
+            if (!selectedStatus) {
+                triggerHaptic('error');
+                showAlert('status-error', "Please select your attendance choice above.");
                 return;
             }
 
-            alertBox.className = "status-msg";
-            alertBox.style.background = "#EBF2FA";
-            alertBox.style.color = "#183B70";
-            alertBox.innerText = "Submitting your response...";
-            alertBox.style.display = "block";
+            if (selectedStatus === "Can't Attend" && !reasonInput) {
+                triggerHaptic('error');
+                showAlert('status-error', "Please provide a reason for missing the session.");
+                document.getElementById('cantReason').focus();
+                return;
+            }
+
+            // Disable button during submit
+            submitBtn.disabled = true;
+            btnText.innerHTML = '<div class="spinner"></div> Submitting...';
+            showAlert('status-info', "Recording your RSVP...");
 
             const payload = {
                 user: userName,
                 participant: userName,
                 name: userName,
                 session: session,
-                status: statusValue,
-                response: statusValue,
+                status: selectedStatus,
+                response: selectedStatus,
                 reason: reasonInput,
                 cantReason: reasonInput,
                 cant_reason: reasonInput,
                 "Can't Join Reason": reasonInput,
                 rating: rating,
-                comment: comment
+                comment: comment,
+                telegram_id: tgUser ? tgUser.id : '',
+                telegram_username: tgUser ? (tgUser.username || '') : ''
             };
 
             try {
@@ -434,19 +626,29 @@
                     body: JSON.stringify(payload)
                 });
 
-                alertBox.className = "status-msg status-success";
-                alertBox.innerText = `✅ Thank you, ${userName}! Your RSVP (${statusValue}) has been recorded.`;
-                document.getElementById('cantReasonBox').style.display = 'none';
+                triggerHaptic('success');
+                showAlert('status-success', `✅ Thank you, ${userName}! Your RSVP (${selectedStatus}) has been recorded.`);
+                
+                btnText.innerText = "RSVP Submitted!";
 
                 if (window.Telegram && window.Telegram.WebApp) {
                     setTimeout(() => {
                         window.Telegram.WebApp.close();
-                    }, 2000);
+                    }, 2200);
                 }
             } catch (err) {
-                alertBox.className = "status-msg status-error";
-                alertBox.innerText = "Submission error. Please check your connection and try again.";
+                triggerHaptic('error');
+                submitBtn.disabled = false;
+                btnText.innerText = "Confirm RSVP";
+                showAlert('status-error', "Submission error. Please check your connection and try again.");
             }
+        }
+
+        function showAlert(className, text) {
+            const alertBox = document.getElementById('statusAlert');
+            alertBox.className = `status-msg ${className}`;
+            alertBox.innerText = text;
+            alertBox.style.display = "block";
         }
     </script>
 </body>
