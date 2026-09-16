@@ -363,7 +363,7 @@
             <div class="form-group">
                 <label class="form-label" for="sessionSelect">Select Session</label>
                 <select id="sessionSelect" class="form-select" onchange="onSessionSelectChange()">
-                    <option value="Session 11">Session 11</option>
+                    <option value="Session 11">Loading Sessions...</option>
                 </select>
             </div>
 
@@ -433,21 +433,7 @@
         let selectedStatus = "";
         let selectedRatingValue = "";
         let tgUser = null;
-
-        let sessionDetailsMap = JSON.parse(localStorage.getItem('camtech_session_details')) || {
-            "Session 11": {
-                title: '"The Library of Babel & Other Stories"',
-                author: "by Jorge Luis Borges",
-                time: "3:30 PM - 5:00 PM",
-                location: "CamTech University, lobby"
-            },
-            "Session 10": {
-                title: '"Fahrenheit 451"',
-                author: "by Ray Bradbury",
-                time: "3:30 PM - 5:00 PM",
-                location: "CamTech Library, Room B"
-            }
-        };
+        let sessionDetailsMap = {};
 
         // Initialize Telegram WebApp API
         window.addEventListener('DOMContentLoaded', () => {
@@ -456,7 +442,6 @@
                 tg.ready();
                 tg.expand();
 
-                // Theme color syncing
                 try {
                     tg.setHeaderColor('#183B70');
                     tg.setBackgroundColor('#F5F1EA');
@@ -487,8 +472,17 @@
 
         async function loadSessionsFromBackend() {
             try {
-                const res = await fetch(SCRIPT_URL);
-                const data = await res.json();
+                // Fetch dynamic session details map directly from GAS backend
+                const resDetails = await fetch(SCRIPT_URL + "?action=getDetails");
+                sessionDetailsMap = await resDetails.json();
+            } catch (err) {
+                console.error("Could not fetch session details from backend:", err);
+            }
+
+            try {
+                // Fetch responses to discover any additional logged sessions
+                const resVotes = await fetch(SCRIPT_URL);
+                const data = await resVotes.json();
                 
                 const sessions = new Set(Object.keys(sessionDetailsMap));
                 if (Array.isArray(data)) {
@@ -498,6 +492,10 @@
                             sessions.add(cleanSess);
                         }
                     });
+                }
+
+                if (sessions.size === 0) {
+                    sessions.add("Session 11");
                 }
 
                 const select = document.getElementById('sessionSelect');
@@ -511,7 +509,7 @@
 
                 onSessionSelectChange();
             } catch (err) {
-                console.log("Using default session details.");
+                console.warn("Using available dynamic sessions.", err);
                 onSessionSelectChange();
             }
         }
@@ -537,12 +535,10 @@
             triggerHaptic('impact');
             selectedStatus = status;
 
-            // Update UI classes
             document.getElementById('btnAttend').classList.toggle('active', status === "I'll Attend");
             document.getElementById('btnCant').classList.toggle('active', status === "Can't Attend");
             document.getElementById('btnUnsure').classList.toggle('active', status === "Not Sure Yet");
 
-            // Toggle Reason Box
             const cantBox = document.getElementById('cantReasonBox');
             if (status === "Can't Attend") {
                 cantBox.style.display = 'flex';
@@ -573,7 +569,6 @@
             const reasonInput = document.getElementById('cantReason').value.trim();
             const rating = document.getElementById('userRating').value;
             const comment = document.getElementById('userComment').value.trim();
-            const alertBox = document.getElementById('statusAlert');
             const submitBtn = document.getElementById('submitBtn');
             const btnText = document.getElementById('btnText');
 
@@ -596,7 +591,6 @@
                 return;
             }
 
-            // Disable button during submit
             submitBtn.disabled = true;
             btnText.innerHTML = '<div class="spinner"></div> Submitting...';
             showAlert('status-info', "Recording your RSVP...");
