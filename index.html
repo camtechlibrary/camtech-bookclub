@@ -471,16 +471,20 @@
         }
 
         async function loadSessionsFromBackend() {
+            let latestSessionFromBackend = "Session 11";
             try {
-                // Cache-busting parameter prevents Telegram Web App browser from serving stale session details
                 const resDetails = await fetch(`${SCRIPT_URL}?action=getDetails&t=${Date.now()}`);
-                sessionDetailsMap = await resDetails.json();
+                const dataDetails = await resDetails.json();
+                
+                sessionDetailsMap = dataDetails.details || {};
+                if (dataDetails.latestSession) {
+                    latestSessionFromBackend = dataDetails.latestSession;
+                }
             } catch (err) {
                 console.error("Could not fetch session details from backend:", err);
             }
 
             try {
-                // Fetch responses to discover any additional logged sessions
                 const resVotes = await fetch(`${SCRIPT_URL}?t=${Date.now()}`);
                 const data = await resVotes.json();
                 
@@ -498,14 +502,26 @@
                     sessions.add("Session 11");
                 }
 
+                const sorted = Array.from(sessions).sort((a, b) => {
+                    const numA = parseInt(a.replace(/\D/g, '')) || 0;
+                    const numB = parseInt(b.replace(/\D/g, '')) || 0;
+                    return numB - numA;
+                });
+
                 const select = document.getElementById('sessionSelect');
                 select.innerHTML = '';
-                Array.from(sessions).reverse().forEach(s => {
+                sorted.forEach(s => {
                     const opt = document.createElement('option');
                     opt.value = s;
                     opt.innerText = s;
                     select.appendChild(opt);
                 });
+
+                if (sorted.includes(latestSessionFromBackend)) {
+                    select.value = latestSessionFromBackend;
+                } else if (sorted.length > 0) {
+                    select.value = sorted[0];
+                }
 
                 onSessionSelectChange();
             } catch (err) {
