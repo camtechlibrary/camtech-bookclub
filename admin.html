@@ -641,14 +641,18 @@
         let allVotes = [];
         let isEditingSessionMode = false;
 
-        let sessionDetailsMap = JSON.parse(localStorage.getItem('camtech_session_details')) || {
-            "Session 11": {
-                title: '"The Library of Babel & Other Stories"',
-                author: "by Jorge Luis Borges",
-                time: "3:30 PM - 5:00 PM",
-                location: "CamTech University, lobby"
+        // Session details map stored directly from Google Apps Script backend
+        let sessionDetailsMap = {};
+
+        async function fetchSessionDetails() {
+            try {
+                const res = await fetch(SCRIPT_URL + "?action=getDetails");
+                sessionDetailsMap = await res.json();
+                updateDynamicSessionDropdown();
+            } catch (err) {
+                console.error("Failed to load session details", err);
             }
-        };
+        }
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
@@ -965,7 +969,19 @@
                 location: sessionLocation
             };
 
-            localStorage.setItem('camtech_session_details', JSON.stringify(sessionDetailsMap));
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'updateSessionDetails',
+                    session: sessionName,
+                    title: `"${bookTitle}"`,
+                    author: `by ${bookAuthor}`,
+                    time: sessionTime,
+                    location: sessionLocation
+                })
+            });
 
             if (!isEditingSessionMode && sendTelegram) {
                 fetch(SCRIPT_URL, {
@@ -1066,6 +1082,7 @@
             a.click();
         }
 
+        fetchSessionDetails();
         loadLiveVotes(false);
 
         setInterval(() => {
