@@ -288,7 +288,30 @@
                 }
             }
             fetchSessionMetadata();
+            fetchSessionDetails();
         });
+
+        async function fetchSessionDetails() {
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const data = await response.json();
+                
+                const activeSession = data.activeSession || "Session 11";
+                const details = (data.details && data.details[activeSession]) || {};
+
+                const bookTitleEl = document.getElementById('bookTitle') || document.getElementById('displayBookTitle');
+                const bookAuthorEl = document.getElementById('bookAuthor') || document.getElementById('displayBookAuthor');
+                const timeEl = document.getElementById('sessionTime') || document.getElementById('displayTime');
+                const locationEl = document.getElementById('sessionLocation') || document.getElementById('displayLocation');
+
+                if (bookTitleEl) bookTitleEl.innerText = details.title || "No Title Set";
+                if (bookAuthorEl) bookAuthorEl.innerText = details.author || "";
+                if (timeEl) timeEl.innerText = details.time || "3:30 PM - 5:00 PM";
+                if (locationEl) locationEl.innerText = details.location || "CamTech University, lobby";
+            } catch (err) {
+                console.error("Failed to fetch live session details:", err);
+            }
+        }
 
         async function fetchSessionMetadata() {
             try {
@@ -349,7 +372,6 @@
             const comment = document.getElementById('userComment').value.trim();
             const alertBox = document.getElementById('statusAlert');
 
-            // STRICT FIX 1: Reject empty, null, or undefined user names
             if (!userName || userName.toLowerCase() === "undefined" || userName.toLowerCase() === "null") {
                 alertBox.className = "status-msg status-error";
                 alertBox.innerText = "Please enter your full name before submitting.";
