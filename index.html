@@ -411,11 +411,20 @@
             alertBox.innerText = "Submitting your response...";
             alertBox.style.display = "block";
 
+            const reasonValue = statusValue === "Can't Attend" ? reason : "";
+
+            // Key mapping aliases to guarantee Apps Script captures the reason column
             const payload = {
                 user: userName,
+                participant: userName,
+                name: userName,
                 session: session,
                 status: statusValue,
-                reason: statusValue === "Can't Attend" ? reason : "",
+                response: statusValue,
+                reason: reasonValue,
+                cantReason: reasonValue,
+                cant_reason: reasonValue,
+                "Can't Join Reason": reasonValue,
                 rating: rating,
                 comment: comment
             };
