@@ -422,20 +422,42 @@ async function saveSessionDetails() {
   banner.style.display = 'block';
 
   try {
+    // Apps Script web apps don't send proper CORS headers back on POST,
+    // so we can't read the POST response body directly from the browser.
+    // Instead: fire the POST, then immediately re-fetch via GET (which DOES
+    // return readable JSON) and confirm the title actually changed.
     await fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
+
+    // Give Apps Script a moment to finish writing, then verify.
+    await new Promise(r => setTimeout(r, 1200));
+
+    const verifyRes = await fetch(`${SCRIPT_URL}?action=getDetails&_=${Date.now()}`);
+    if (!verifyRes.ok) throw new Error(`Verification fetch failed with status ${verifyRes.status}`);
+    const verifyData = await verifyRes.json();
+    const savedDetails = verifyData.details && verifyData.details[payload.session];
+
+    if (!savedDetails || savedDetails.title !== payload.title) {
+      throw new Error('Save did not take effect — backend still shows old data. Check the Apps Script deployment is the latest version and "Execute as: Me" / "Who has access: Anyone".');
+    }
+
     banner.innerText = payload.broadcastTelegram
-      ? 'Session details saved and broadcast to Telegram poll.'
-      : 'Session details saved. Poll and web app will show this on next load.';
+      ? 'Session details saved, verified, and broadcast to Telegram poll.'
+      : 'Session details saved and verified against the backend.';
     toggleEditPanel();
-    setTimeout(loadData, 800);
+    latestData = verifyData;
+    populateSessionFilter(verifyData);
+    renderSessionCard(verifyData);
+    renderVotesTable(verifyData);
+    updateStats(verifyData);
   } catch (err) {
     banner.className = 'banner error';
-    banner.innerText = 'Save failed. Check your connection.';
+    banner.innerText = 'Save failed: ' + (err.message || 'Unknown error. Check your connection and the Apps Script deployment.');
+    console.error('saveSessionDetails error:', err);
   }
 }
 
