@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CamTech Library System - Librarian Console</title>
+<style>
+  :root {
+    --navy: #183B70;
+    --navy-hover: #234E8C;
+    --bg: #F5F6F8;
+    --card-bg: #FFFFFF;
+    --border: #E3E6EA;
+    --text-dark: #1F2937;
+    --text-muted: #6B7280;
+    --green: #2E7D32; --green-bg: #E8F5E9;
+    --red: #C62828; --red-bg: #FFEBEE;
+    --amber: #B26A00; --amber-bg: #FFF3E0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+    background: var(--bg);
+    color: var(--text-dark);
+  }
+  .topbar {
+    background: var(--navy);
+    color: #fff;
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .topbar .status { font-size: 12px; font-weight: 600; opacity: 0.9; display:flex; align-items:center; gap:6px; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #4CD964; }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+  .banner {
+    background: #EAF2FE;
+    border: 1px solid #C7DBFA;
+    color: #1B4C9C;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  .banner.error { background: var(--red-bg); border-color: #F5C2C2; color: var(--red); }
+
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .header-row h1 { font-size: 22px; color: var(--navy); }
+  .header-row .subtitle { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  .session-controls { display: flex; align-items: center; gap: 10px; }
+  .session-controls label { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; }
+  select, input[type=text], input[type=number] {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font-size: 13px;
+    background: #fff;
+  }
+  .btn {
+    padding: 9px 14px;
+    border-radius: 6px;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-primary { background: var(--navy); color: #fff; }
+  .btn-primary:hover { background: var(--navy-hover); }
+  .btn-secondary { background: #fff; border: 1px solid var(--border); color: var(--text-dark); }
+  .btn-secondary:hover { background: #F0F1F3; }
+  .btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid #F5C2C2; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-card .label { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 6px; }
+  .stat-card .value { font-size: 26px; font-weight: 700; }
+  .stat-confirmed .value { color: var(--green); }
+  .stat-unable .value { color: var(--red); }
+  .stat-notsure .value { color: var(--amber); }
+  .stat-total .value { color: var(--navy); }
+
+  .main-grid { display: grid; grid-template-columns: 340px 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+  .card-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .card-title-row .eyebrow { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; }
+
+  .book-title { font-family: Georgia, serif; font-size: 19px; font-weight: 700; color: var(--navy); }
+  .book-author { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+  .meta-row { font-size: 13px; color: var(--text-dark); display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+
+  .edit-panel { display: none; flex-direction: column; gap: 8px; margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 12px; }
+  .edit-panel.open { display: flex; }
+  .edit-panel label { font-size: 11px; font-weight: 700; color: var(--text-muted); }
+  .checkbox-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-dark); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 12px; background: #FAFBFC; border-bottom: 1px solid var(--border); font-size: 11px; letter-spacing: 0.5px; color: var(--text-muted); }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .empty-row td { text-align: center; color: var(--text-muted); padding: 30px; }
+
+  .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+  .badge-attend { background: var(--green-bg); color: var(--green); }
+  .badge-cant { background: var(--red-bg); color: var(--red); }
+  .badge-unsure { background: var(--amber-bg); color: var(--amber); }
+
+  .actions-cell { display: flex; gap: 6px; }
+  .icon-btn { background: none; border: none; cursor: pointer; font-size: 13px; padding: 4px 6px; border-radius: 4px; }
+  .icon-btn:hover { background: #F0F1F3; }
+
+  .toolbar-row { display: flex; gap: 10px; margin-top: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+  .sync-note { font-size: 11px; color: var(--text-muted); }
+
+  .splitter-result { font-size: 13px; background: #EAF2FE; color: #1B4C9C; padding: 10px; border-radius: 6px; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>CAMTECH LIBRARY SYSTEM</div>
+  <div class="status"><span class="status-dot"></span> LIBRARIAN CONSOLE (AUTO SYNC)</div>
+</div>
+
+<div class="container">
+
+  <div id="banner" class="banner" style="display:none;"></div>
+
+  <div class="header-row">
+    <div>
+      <h1>Book Club Attendance</h1>
+      <div class="subtitle">Session Management &amp; Participant Feedback</div>
+    </div>
+    <div class="session-controls">
+      <label>FILTER SESSION:</label>
+      <select id="sessionFilter" onchange="onFilterChange()"></select>
+      <button class="btn btn-primary" onclick="openCreateSession()">+ Add Session</button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card stat-confirmed"><div class="label">CONFIRMED</div><div class="value" id="statConfirmed">0</div></div>
+    <div class="stat-card stat-unable"><div class="label">UNABLE</div><div class="value" id="statUnable">0</div></div>
+    <div class="stat-card stat-notsure"><div class="label">NOT SURE</div><div class="value" id="statNotSure">0</div></div>
+    <div class="stat-card stat-total"><div class="label">TOTAL VOTES</div><div class="value" id="statTotal">0</div></div>
+  </div>
+
+  <div class="main-grid">
+    <div>
+      <div class="card">
+        <div class="card-title-row">
+          <div class="eyebrow">Currently Reading</div>
+          <button class="btn btn-secondary" onclick="toggleEditPanel()">✏️ Edit Details</button>
+        </div>
+        <div class="book-title" id="bookTitleDisplay">Untitled Book</div>
+        <div class="book-author" id="bookAuthorDisplay">by Unknown Author</div>
+        <div class="meta-row">📅 <span id="sessionNameDisplay">Session —</span></div>
+        <div class="meta-row">🕒 <span id="sessionTimeDisplay">3:30 PM - 5:00 PM</span></div>
+        <div class="meta-row">📍 <span id="sessionLocationDisplay">CamTech University, lobby</span></div>
+
+        <div class="edit-panel" id="editPanel">
+          <label>Session</label>
+          <input type="text" id="editSession" disabled>
+          <label>Book Title</label>
+          <input type="text" id="editTitle" placeholder="Book title">
+          <label>Author</label>
+          <input type="text" id="editAuthor" placeholder="Author name">
+          <label>Time</label>
+          <input type="text" id="editTime" placeholder="3:30 PM - 5:00 PM">
+          <label>Location</label>
+          <input type="text" id="editLocation" placeholder="CamTech University, lobby">
+          <label>Total Pages</label>
+          <input type="number" id="editPages" placeholder="200">
+          <div class="checkbox-row">
+            <input type="checkbox" id="editBroadcast">
+            <label for="editBroadcast" style="font-weight:400;">Broadcast update to Telegram group poll</label>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:6px;">
+            <button class="btn btn-primary" onclick="saveSessionDetails()">Save &amp; Sync</button>
+            <button class="btn btn-secondary" onclick="toggleEditPanel()">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title-row"><div class="eyebrow">📖 Page Reading Splitter Tool</div></div>
+        <label style="font-size:12px; font-weight:600;">Total Book Pages:</label>
+        <input type="number" id="splitterPages" style="width:100%; margin-top:4px;" placeholder="200" oninput="updateSplitter()">
+        <label style="font-size:12px; font-weight:600; margin-top:10px; display:block;">Total Members Joining (Auto-linked to Confirmed):</label>
+        <input type="number" id="splitterMembers" style="width:100%; margin-top:4px;" disabled>
+        <div class="splitter-result" id="splitterResult">No confirmed members joining yet.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>PARTICIPANT</th>
+            <th>SESSION</th>
+            <th>RESPONSE</th>
+            <th>CAN'T JOIN REASON</th>
+            <th>RATING</th>
+            <th>COMMENT</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody id="votesTableBody">
+          <tr class="empty-row"><td colspan="7">Loading votes...</td></tr>
+        </tbody>
+      </table>
+
+      <div class="toolbar-row">
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-primary" onclick="loadData()">Refresh Data</button>
+          <button class="btn btn-secondary" onclick="downloadCSV()">Download CSV</button>
+          <button class="btn btn-secondary" onclick="window.print()">Print Report</button>
+        </div>
+        <div class="sync-note" id="syncNote">Not yet synced</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Same Apps Script deployment URL used by index.html — single source of truth
+// for the active session, book details, and every recorded vote.
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyiiHQS1n7EkTep6OXYWA2aPEZBsb2pAuxty8El4RmzZPkt2sbNkASw4H3Buep6BjQL/exec";
+
+let latestData = null;
+let currentFilterSession = null;
+
+window.addEventListener('DOMContentLoaded', () => {
+  loadData();
+  // Keep the dashboard fresh automatically, in case votes come in from Telegram/web app
+  setInterval(loadData, 30000);
+});
+
+async function loadData() {
+  try {
+    const res = await fetch(`${SCRIPT_URL}?action=getDetails`);
+    const data = await res.json();
+    latestData = data;
+
+    if (!currentFilterSession) currentFilterSession = data.activeSession;
+
+    populateSessionFilter(data);
+    renderSessionCard(data);
+    renderVotesTable(data);
+    updateStats(data);
+
+    document.getElementById('banner').style.display = 'none';
+    document.getElementById('syncNote').innerText = `Auto-synced at ${new Date().toLocaleTimeString()}`;
+  } catch (err) {
+    const banner = document.getElementById('banner');
+    banner.className = 'banner error';
+    banner.innerText = 'Could not reach the backend. Check the Apps Script deployment URL and permissions.';
+    banner.style.display = 'block';
+    console.error(err);
+  }
+}
+
+function populateSessionFilter(data) {
+  const select = document.getElementById('sessionFilter');
+  const sessions = new Set(Object.keys(data.details || {}));
+  sessions.add(data.activeSession);
+  if (data.nextSession) sessions.add(data.nextSession);
+  (data.votes || []).forEach(v => sessions.add(v.session));
+
+  const sorted = Array.from(sessions).sort((a, b) => {
+    const na = parseInt(a.replace(/\D/g, '')) || 0;
+    const nb = parseInt(b.replace(/\D/g, '')) || 0;
+    return nb - na;
+  });
+
+  select.innerHTML = '';
+  sorted.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s;
+    opt.innerText = s === data.activeSession ? `${s} (Current Active)` : s;
+    select.appendChild(opt);
+  });
+  select.value = currentFilterSession;
+}
+
+function onFilterChange() {
+  currentFilterSession = document.getElementById('sessionFilter').value;
+  renderSessionCard(latestData);
+  renderVotesTable(latestData);
+  updateStats(latestData);
+}
+
+function renderSessionCard(data) {
+  const details = (data.details && data.details[currentFilterSession]) || {
+    title: "No Title Set", author: "", time: "3:30 PM - 5:00 PM", location: "CamTech University, lobby", pages: 0
+  };
+
+  document.getElementById('bookTitleDisplay').innerText = details.title || "Untitled Book";
+  document.getElementById('bookAuthorDisplay').innerText = details.author ? `by ${details.author}` : "by Unknown Author";
+  document.getElementById('sessionNameDisplay').innerText = currentFilterSession;
+  document.getElementById('sessionTimeDisplay').innerText = details.time || "3:30 PM - 5:00 PM";
+  document.getElementById('sessionLocationDisplay').innerText = details.location || "CamTech University, lobby";
+
+  // Pre-fill the edit panel too, so opening it never shows stale data
+  document.getElementById('editSession').value = currentFilterSession;
+  document.getElementById('editTitle').value = details.title === "No Title Set" ? "" : (details.title || "");
+  document.getElementById('editAuthor').value = details.author || "";
+  document.getElementById('editTime').value = details.time || "3:30 PM - 5:00 PM";
+  document.getElementById('editLocation').value = details.location || "CamTech University, lobby";
+  document.getElementById('editPages').value = details.pages || '';
+
+  document.getElementById('splitterPages').value = details.pages || '';
+}
+
+function renderVotesTable(data) {
+  const tbody = document.getElementById('votesTableBody');
+  const votes = (data.votes || []).filter(v => v.session === currentFilterSession);
+
+  if (votes.length === 0) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="7">No votes recorded for this session yet.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = votes.map(v => `
+    <tr>
+      <td>${escapeHtml(v.user)}</td>
+      <td>${escapeHtml(v.session)}</td>
+      <td>${statusBadge(v.status)}</td>
+      <td>${escapeHtml(v.reason)}</td>
+      <td>${escapeHtml(v.rating)}</td>
+      <td>${escapeHtml(v.comment)}</td>
+      <td class="actions-cell">
+        <button class="icon-btn" title="Delete" onclick="deleteVote(${v.rowIndex})">🗑️</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function statusBadge(status) {
+  if (status === "I'll Attend") return `<span class="badge badge-attend">I'll Attend</span>`;
+  if (status === "Can't Attend") return `<span class="badge badge-cant">Can't Attend</span>`;
+  return `<span class="badge badge-unsure">Not Sure Yet</span>`;
+}
+
+function updateStats(data) {
+  const votes = (data.votes || []).filter(v => v.session === currentFilterSession);
+  const confirmed = votes.filter(v => v.status === "I'll Attend").length;
+  const unable = votes.filter(v => v.status === "Can't Attend").length;
+  const notSure = votes.filter(v => v.status === "Not Sure Yet").length;
+
+  document.getElementById('statConfirmed').innerText = confirmed;
+  document.getElementById('statUnable').innerText = unable;
+  document.getElementById('statNotSure').innerText = notSure;
+  document.getElementById('statTotal').innerText = votes.length;
+
+  document.getElementById('splitterMembers').value = confirmed;
+  updateSplitter();
+}
+
+function updateSplitter() {
+  const pages = parseInt(document.getElementById('splitterPages').value) || 0;
+  const members = parseInt(document.getElementById('splitterMembers').value) || 0;
+  const result = document.getElementById('splitterResult');
+
+  if (members === 0) {
+    result.innerText = "No confirmed members joining yet.";
+    return;
+  }
+  if (pages === 0) {
+    result.innerText = "Enter total pages to calculate the split.";
+    return;
+  }
+  const perPerson = Math.ceil(pages / members);
+  result.innerText = `Each of the ${members} confirmed member(s) reads about ${perPerson} pages.`;
+}
+
+function toggleEditPanel() {
+  document.getElementById('editPanel').classList.toggle('open');
+}
+
+async function saveSessionDetails() {
+  const payload = {
+    action: 'updateSessionDetails',
+    session: document.getElementById('editSession').value,
+    title: document.getElementById('editTitle').value.trim() || "No Title Set",
+    author: document.getElementById('editAuthor').value.trim(),
+    time: document.getElementById('editTime').value.trim() || "3:30 PM - 5:00 PM",
+    location: document.getElementById('editLocation').value.trim() || "CamTech University, lobby",
+    pages: parseInt(document.getElementById('editPages').value) || 0,
+    broadcastTelegram: document.getElementById('editBroadcast').checked
+  };
+
+  const banner = document.getElementById('banner');
+  banner.className = 'banner';
+  banner.innerText = 'Saving...';
+  banner.style.display = 'block';
+
+  try {
+    // Apps Script web apps don't send proper CORS headers back on POST,
+    // so we can't read the POST response body directly from the browser.
+    // Instead: fire the POST, then immediately re-fetch via GET (which DOES
+    // return readable JSON) and confirm the title actually changed.
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    // Give Apps Script a moment to finish writing, then verify.
+    await new Promise(r => setTimeout(r, 1200));
+
+    const verifyRes = await fetch(`${SCRIPT_URL}?action=getDetails&_=${Date.now()}`);
+    if (!verifyRes.ok) throw new Error(`Verification fetch failed with status ${verifyRes.status}`);
+    const verifyData = await verifyRes.json();
+    const savedDetails = verifyData.details && verifyData.details[payload.session];
+
+    if (!savedDetails || savedDetails.title !== payload.title) {
+      throw new Error('Save did not take effect — backend still shows old data. Check the Apps Script deployment is the latest version and "Execute as: Me" / "Who has access: Anyone".');
+    }
+
+    banner.innerText = payload.broadcastTelegram
+      ? 'Session details saved, verified, and broadcast to Telegram poll.'
+      : 'Session details saved and verified against the backend.';
+    toggleEditPanel();
+    latestData = verifyData;
+    populateSessionFilter(verifyData);
+    renderSessionCard(verifyData);
+    renderVotesTable(verifyData);
+    updateStats(verifyData);
+  } catch (err) {
+    banner.className = 'banner error';
+    banner.innerText = 'Save failed: ' + (err.message || 'Unknown error. Check your connection and the Apps Script deployment.');
+    console.error('saveSessionDetails error:', err);
+  }
+}
+
+function openCreateSession() {
+  const num = prompt("Enter the session number to create (e.g. 13):");
+  if (!num) return;
+  currentFilterSession = `Session ${num.trim()}`;
+  document.getElementById('editSession').value = currentFilterSession;
+  document.getElementById('editTitle').value = '';
+  document.getElementById('editAuthor').value = '';
+  document.getElementById('editTime').value = '3:30 PM - 5:00 PM';
+  document.getElementById('editLocation').value = 'CamTech University, lobby';
+  document.getElementById('editPages').value = '';
+  document.getElementById('editPanel').classList.add('open');
+
+  const banner = document.getElementById('banner');
+  banner.className = 'banner';
+  banner.innerText = `Ready to create ${currentFilterSession}. Fill in the details on the left and click "Save & Sync".`;
+  banner.style.display = 'block';
+}
+
+async function deleteVote(rowIndex) {
+  if (!confirm('Delete this vote entry? This cannot be undone.')) return;
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', rowIndex })
+    });
+    setTimeout(loadData, 800);
+  } catch (err) {
+    alert('Delete failed. Check your connection.');
+  }
+}
+
+function downloadCSV() {
+  const votes = (latestData.votes || []).filter(v => v.session === currentFilterSession);
+  if (votes.length === 0) { alert('No votes to export for this session.'); return; }
+
+  const headers = ['Timestamp', 'User', 'Status', 'Session', 'Reason', 'Rating', 'Comment'];
+  const rows = votes.map(v => [v.timestamp, v.user, v.status, v.session, v.reason, v.rating, v.comment]);
+  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${currentFilterSession.replace(/\s+/g, '_')}_votes.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function escapeHtml(str) {
+  if (str === undefined || str === null) return '—';
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>
