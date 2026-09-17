@@ -10,7 +10,7 @@
         :root {
             --camtech-navy: #183B70;
             --camtech-navy-hover: #234E8C;
-            --camtech-light-blue: #EBF2FA; 
+            --camtech-light-blue: #EBF2FA;
             --camtech-accent-blue: #C0D6F0;
             --bg-sand: #F5F1EA;
             --card-bg: #FFFFFF;
@@ -19,10 +19,10 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        body { 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
-            background: var(--bg-sand); 
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-sand);
             color: var(--text-dark);
             min-height: 100vh;
             display: flex;
@@ -168,6 +168,7 @@
         }
 
         .btn-vote:active { transform: scale(0.98); }
+        .btn-vote:disabled { opacity: 0.6; cursor: not-allowed; }
         .btn-attend { background: var(--camtech-navy); color: #FFFFFF; }
         .btn-attend:hover { background: var(--camtech-navy-hover); }
         .btn-cant { background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; }
@@ -205,7 +206,7 @@
         <div class="brand-header">
             <img src="camtech_logo.png" alt="CamTech Logo" class="header-logo" onerror="this.style.display='none'">
             <div class="brand-title">CamTech Library Book Club</div>
-            <div class="page-heading">Weekly Reading & Discussion</div>
+            <div class="page-heading">Weekly Reading &amp; Discussion</div>
         </div>
 
         <div class="form-content">
@@ -226,21 +227,9 @@
                 <div class="session-meta-row">📍 <span id="sessionLocation">CamTech University, lobby</span></div>
             </div>
 
-            <div class="conditional-box" id="feedbackBox">
-                <label class="form-label">Optional Feedback / Rating</label>
-                <select id="userRating" class="form-select">
-                    <option value="">Rate past session (Optional)</option>
-                    <option value="5 ⭐">5 ⭐ - Excellent</option>
-                    <option value="4 ⭐">4 ⭐ - Very Good</option>
-                    <option value="3 ⭐">3 ⭐ - Good</option>
-                    <option value="2 ⭐">2 ⭐ - Average</option>
-                    <option value="1 ⭐">1 ⭐ - Needs Improvement</option>
-                </select>
-                <input type="text" id="userComment" class="form-input" placeholder="Comments or book recommendations...">
-            </div>
-
             <label class="form-label">Will you join us?</label>
-            
+
+            <!-- ONE CLICK = DONE for Attend / Not Sure. Only Can't Attend needs a reason. -->
             <div class="vote-options">
                 <button type="button" class="btn-vote btn-attend" onclick="submitResponse('I\'ll Attend')">
                     ✅ I'll Attend
@@ -261,6 +250,19 @@
                 </button>
             </div>
 
+            <div class="conditional-box" id="feedbackBox" style="display: flex;">
+                <label class="form-label">Optional Feedback / Rating</label>
+                <select id="userRating" class="form-select">
+                    <option value="">Rate past session (Optional)</option>
+                    <option value="5 ⭐">5 ⭐ - Excellent</option>
+                    <option value="4 ⭐">4 ⭐ - Very Good</option>
+                    <option value="3 ⭐">3 ⭐ - Good</option>
+                    <option value="2 ⭐">2 ⭐ - Average</option>
+                    <option value="1 ⭐">1 ⭐ - Needs Improvement</option>
+                </select>
+                <input type="text" id="userComment" class="form-input" placeholder="Comments or book recommendations...">
+            </div>
+
             <div id="statusAlert" class="status-msg"></div>
         </div>
 
@@ -270,10 +272,11 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2nvLYa1kNGijsg_XEqfW1lSdtsTUnOfBDrTkjL6GbyDsmPgKF2dI40rVu9ujQ9Xym/exec";
+        // Same Apps Script deployment URL used by admin.html — this is what
+        // keeps the poll, the web app, and the admin dashboard all in sync.
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyiiHQS1n7EkTep6OXYWA2aPEZBsb2pAuxty8El4RmzZPkt2sbNkASw4H3Buep6BjQL/exec";
         let sessionDetailsMap = {};
         let activeSessionName = "";
-        let activeSessionNeedsSetup = false;
 
         window.addEventListener('DOMContentLoaded', () => {
             if (window.Telegram && window.Telegram.WebApp) {
@@ -293,20 +296,20 @@
             try {
                 const res = await fetch(`${SCRIPT_URL}?action=getDetails`);
                 const data = await res.json();
-                
+
                 sessionDetailsMap = data.details || {};
+                // The dropdown ALWAYS defaults to whatever the backend says is
+                // currently active — this is the auto-rollover from Session 11 to 12.
                 activeSessionName = data.activeSession || Object.keys(sessionDetailsMap)[0] || "Session 11";
-                activeSessionNeedsSetup = !!data.activeNeedsSetup;
 
                 const select = document.getElementById('sessionSelect');
                 select.innerHTML = '';
-                
-                const availableSessions = Object.keys(sessionDetailsMap);
-                if (!availableSessions.includes(activeSessionName)) {
-                    availableSessions.push(activeSessionName);
-                }
 
-                availableSessions.sort().reverse().forEach(sess => {
+                const availableSessions = new Set(Object.keys(sessionDetailsMap));
+                availableSessions.add(activeSessionName);
+                if (data.nextSession) availableSessions.add(data.nextSession);
+
+                Array.from(availableSessions).sort().reverse().forEach(sess => {
                     const opt = document.createElement('option');
                     opt.value = sess;
                     opt.innerText = sess === activeSessionName ? `${sess} (Current Active)` : sess;
@@ -325,17 +328,7 @@
             const selected = document.getElementById('sessionSelect').value;
             const details = sessionDetailsMap[selected];
 
-            const feedbackBox = document.getElementById('feedbackBox');
-            feedbackBox.style.display = (selected !== activeSessionName) ? 'flex' : 'none';
-
-            const needsSetup = selected === activeSessionName && activeSessionNeedsSetup;
-
-            if (needsSetup) {
-                document.getElementById('bookTitle').innerText = "Book pick coming soon";
-                document.getElementById('bookAuthor').innerText = "The librarian hasn't added this week's book yet — check back soon!";
-                document.getElementById('sessionTime').innerText = (details && details.time) || "3:30 PM - 5:00 PM";
-                document.getElementById('sessionLocation').innerText = (details && details.location) || "CamTech University, lobby";
-            } else if (details) {
+            if (details) {
                 document.getElementById('bookTitle').innerText = details.title || "No Title Set";
                 document.getElementById('bookAuthor').innerText = details.author || "";
                 document.getElementById('sessionTime').innerText = details.time || "3:30 PM - 5:00 PM";
@@ -351,6 +344,12 @@
             box.style.display = box.style.display === 'flex' ? 'none' : 'flex';
         }
 
+        function setVoteButtonsDisabled(disabled) {
+            document.querySelectorAll('.btn-vote').forEach(b => b.disabled = disabled);
+        }
+
+        // Attend / Not Sure call this directly on a single click — no confirm step.
+        // Can't Attend routes through the reason box first, then calls this too.
         async function submitResponse(statusValue) {
             const userName = document.getElementById('userName').value.trim();
             const session = document.getElementById('sessionSelect').value;
@@ -373,6 +372,7 @@
                 return;
             }
 
+            setVoteButtonsDisabled(true);
             alertBox.className = "status-msg";
             alertBox.style.background = "#EBF2FA";
             alertBox.style.color = "#183B70";
@@ -406,6 +406,7 @@
             } catch (err) {
                 alertBox.className = "status-msg status-error";
                 alertBox.innerText = "Submission error. Check network connection.";
+                setVoteButtonsDisabled(false);
             }
         }
     </script>
