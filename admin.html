@@ -1,897 +1,500 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CamTech Library System - Librarian Console</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --camtech-navy: #183B70;
-            --camtech-navy-hover: #234E8C;
-            --camtech-light-blue: #EBF2FA;
-            --camtech-accent-blue: #C0D6F0;
-            --bg-sand: #F5F1EA;
-            --card-bg: #FAF7F2;
-            --text-dark: #2C3E50;
-            --text-muted: #70685C;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CamTech Library System - Librarian Console</title>
+<style>
+  :root {
+    --navy: #183B70;
+    --navy-hover: #234E8C;
+    --bg: #F5F6F8;
+    --card-bg: #FFFFFF;
+    --border: #E3E6EA;
+    --text-dark: #1F2937;
+    --text-muted: #6B7280;
+    --green: #2E7D32; --green-bg: #E8F5E9;
+    --red: #C62828; --red-bg: #FFEBEE;
+    --amber: #B26A00; --amber-bg: #FFF3E0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+    background: var(--bg);
+    color: var(--text-dark);
+  }
+  .topbar {
+    background: var(--navy);
+    color: #fff;
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .topbar .status { font-size: 12px; font-weight: 600; opacity: 0.9; display:flex; align-items:center; gap:6px; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #4CD964; }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
-            background: var(--bg-sand); 
-            color: var(--text-dark); 
-        }
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
 
-        .top-navbar {
-            background: var(--camtech-navy);
-            color: #FFFFFF;
-            padding: 10px 28px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 13px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .nav-brand { display: flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: 0.8px; }
-        
-        .nav-logo {
-            height: 36px;
-            width: auto;
-            object-fit: contain;
-            background: #FFFFFF;
-            padding: 4px 8px;
-            border-radius: 6px;
-        }
+  .banner {
+    background: #EAF2FE;
+    border: 1px solid #C7DBFA;
+    color: #1B4C9C;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  .banner.error { background: var(--red-bg); border-color: #F5C2C2; color: var(--red); }
 
-        .nav-title { font-size: 12px; color: var(--camtech-accent-blue); text-transform: uppercase; letter-spacing: 0.6px; display: flex; align-items: center; gap: 8px; }
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .header-row h1 { font-size: 22px; color: var(--navy); }
+  .header-row .subtitle { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
 
-        .live-dot {
-            width: 8px; height: 8px; background-color: #2ECC71; border-radius: 50%; display: inline-block;
-            box-shadow: 0 0 0 0 rgba(46, 204, 113, 1);
-            animation: pulse-green 2s infinite;
-        }
+  .session-controls { display: flex; align-items: center; gap: 10px; }
+  .session-controls label { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; }
+  select, input[type=text], input[type=number] {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font-size: 13px;
+    background: #fff;
+  }
+  .btn {
+    padding: 9px 14px;
+    border-radius: 6px;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-primary { background: var(--navy); color: #fff; }
+  .btn-primary:hover { background: var(--navy-hover); }
+  .btn-secondary { background: #fff; border: 1px solid var(--border); color: var(--text-dark); }
+  .btn-secondary:hover { background: #F0F1F3; }
+  .btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid #F5C2C2; }
 
-        @keyframes pulse-green {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
-        }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-card .label { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 6px; }
+  .stat-card .value { font-size: 26px; font-weight: 700; }
+  .stat-confirmed .value { color: var(--green); }
+  .stat-unable .value { color: var(--red); }
+  .stat-notsure .value { color: var(--amber); }
+  .stat-total .value { color: var(--navy); }
 
-        .dashboard-container {
-            max-width: 1300px;
-            margin: 28px auto;
-            padding: 0 24px;
-        }
+  .main-grid { display: grid; grid-template-columns: 340px 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
 
-        .status-alert-banner {
-            padding: 12px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .banner-confirmed { background: var(--camtech-light-blue); color: var(--camtech-navy); border: 1px solid var(--camtech-accent-blue); }
-        .banner-canceled { background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+  .card-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .card-title-row .eyebrow { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; }
 
-        .header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-        .page-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--camtech-navy); }
-        .page-subtext { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .book-title { font-family: Georgia, serif; font-size: 19px; font-weight: 700; color: var(--navy); }
+  .book-author { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+  .meta-row { font-size: 13px; color: var(--text-dark); display: flex; align-items: center; gap: 6px; margin-top: 6px; }
 
-        .week-selector-card {
-            background: #FFFFFF;
-            border: 1px solid #EAE3D9;
-            padding: 8px 14px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .week-selector-card label { font-size: 11px; font-weight: 700; color: #8C8275; text-transform: uppercase; }
-        .week-selector-card select {
-            padding: 6px 12px;
-            border-radius: 6px;
-            border: 1px solid #DCD4C8;
-            font-size: 13px;
-            color: var(--camtech-navy);
-            font-weight: 600;
-            outline: none;
-        }
+  .edit-panel { display: none; flex-direction: column; gap: 8px; margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 12px; }
+  .edit-panel.open { display: flex; }
+  .edit-panel label { font-size: 11px; font-weight: 700; color: var(--text-muted); }
+  .checkbox-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-dark); }
 
-        .btn-add-session {
-            background: var(--camtech-navy);
-            color: #FFFFFF;
-            border: none;
-            padding: 7px 14px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: background 0.2s ease;
-        }
-        .btn-add-session:hover { background: var(--camtech-navy-hover); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 12px; background: #FAFBFC; border-bottom: 1px solid var(--border); font-size: 11px; letter-spacing: 0.5px; color: var(--text-muted); }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .empty-row td { text-align: center; color: var(--text-muted); padding: 30px; }
 
-        .btn-edit-side {
-            background: #EAE3D9;
-            color: var(--camtech-navy);
-            border: none;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background 0.2s ease;
-        }
-        .btn-edit-side:hover { background: #DCD4C8; }
+  .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+  .badge-attend { background: var(--green-bg); color: var(--green); }
+  .badge-cant { background: var(--red-bg); color: var(--red); }
+  .badge-unsure { background: var(--amber-bg); color: var(--amber); }
 
-        .metrics-grid {
-            display: flex;
-            gap: 14px;
-        }
-        .metric-card {
-            border-radius: 12px;
-            padding: 14px 20px;
-            min-width: 120px;
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-        .metric-card.confirmed { background: var(--camtech-light-blue); color: var(--camtech-navy); }
-        .metric-card.cant { background: #FFEBEE; color: #C62828; }
-        .metric-card.unsure { background: #FFFDE7; color: #F57F17; }
-        .metric-card.no-response { background: #ECEFF1; color: #455A64; }
+  .actions-cell { display: flex; gap: 6px; }
+  .icon-btn { background: none; border: none; cursor: pointer; font-size: 13px; padding: 4px 6px; border-radius: 4px; }
+  .icon-btn:hover { background: #F0F1F3; }
 
-        .metric-label { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; }
-        .metric-value { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin-top: 6px; }
+  .toolbar-row { display: flex; gap: 10px; margin-top: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+  .sync-note { font-size: 11px; color: var(--text-muted); }
 
-        .content-grid {
-            display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 24px;
-        }
-
-        .side-card {
-            background: var(--card-bg);
-            border-radius: 14px;
-            padding: 20px;
-            border: 1px solid #EAE3D9;
-            margin-bottom: 18px;
-        }
-        .side-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .card-label { font-size: 9px; font-weight: 700; letter-spacing: 0.8px; color: #8C8275; text-transform: uppercase; }
-        .book-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: var(--camtech-navy); line-height: 1.3; }
-        .book-author { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; margin-top: 2px; }
-        .meta-item { font-size: 12px; color: #4A443C; margin-bottom: 8px; display: flex; gap: 8px; }
-
-        .tool-input-group { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-        .tool-input-group label { font-size: 11px; font-weight: 600; color: var(--text-muted); }
-        .tool-input-group input { padding: 6px 10px; border-radius: 6px; border: 1px solid #DCD4C8; font-size: 12px; }
-        .calc-result { margin-top: 10px; font-size: 12px; font-weight: 600; color: var(--camtech-navy); background: var(--camtech-light-blue); padding: 8px; border-radius: 6px; }
-
-        .table-card {
-            background: #FFFFFF;
-            border-radius: 14px;
-            border: 1px solid #EAE3D9;
-            overflow-x: auto;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-        }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
-        th { 
-            background: var(--card-bg); 
-            padding: 12px 14px; 
-            font-size: 10px; 
-            font-weight: 700; 
-            color: #8C8275; 
-            letter-spacing: 0.6px;
-            border-bottom: 1px solid #EAE3D9; 
-            text-transform: uppercase;
-        }
-        td { padding: 10px 14px; border-bottom: 1px solid #F2ECE4; color: var(--text-dark); }
-        tr:last-child td { border-bottom: none; }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 10px;
-            font-weight: 600;
-        }
-        .badge-attend { background: var(--camtech-light-blue); color: var(--camtech-navy); }
-        .badge-cant { background: #FFEBEE; color: #C62828; }
-        .badge-unsure { background: #FFF8E1; color: #B78103; }
-        .badge-none { background: #ECEFF1; color: #546E7A; }
-
-        .btn-btn-group { display: flex; gap: 4px; }
-        .btn-edit { background: #EAE3D9; color: var(--camtech-navy); border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 600; }
-        .btn-delete { background: #FFEBEE; color: #C62828; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 600; }
-
-        .actions-footer {
-            margin-top: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .actions-footer-buttons { display: flex; gap: 12px; }
-        .btn-action {
-            padding: 10px 18px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            border: 1px solid transparent;
-        }
-        .btn-primary { background: var(--camtech-navy); color: #FFF; }
-        .btn-primary:hover { background: var(--camtech-navy-hover); }
-        .btn-secondary { background: #FFFFFF; color: var(--text-dark); border-color: #DCD4C8; }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .modal-card {
-            background: #FFF;
-            padding: 24px;
-            border-radius: 12px;
-            width: 440px;
-            max-width: 90%;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        }
-        .modal-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--camtech-navy); margin-bottom: 16px; }
-        .modal-field { margin-bottom: 12px; }
-        .modal-field label { display: block; font-size: 11px; font-weight: 700; color: #8C8275; margin-bottom: 4px; text-transform: uppercase; }
-        .modal-field input, .modal-field select { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid #DCD4C8; font-size: 12px; outline: none; }
-        .modal-field-checkbox { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 12px; color: var(--camtech-navy); font-weight: 600; }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
-    </style>
+  .splitter-result { font-size: 13px; background: #EAF2FE; color: #1B4C9C; padding: 10px; border-radius: 6px; margin-top: 8px; }
+</style>
 </head>
 <body>
 
-    <div class="top-navbar">
-        <div class="nav-brand">
-            <img src="camtech_logo.png" alt="CamTech Logo" class="nav-logo" onerror="this.style.display='none'">
-            <span>CAMTECH LIBRARY SYSTEM</span>
+<div class="topbar">
+  <div>CAMTECH LIBRARY SYSTEM</div>
+  <div class="status"><span class="status-dot"></span> LIBRARIAN CONSOLE (AUTO SYNC)</div>
+</div>
+
+<div class="container">
+
+  <div id="banner" class="banner" style="display:none;"></div>
+
+  <div class="header-row">
+    <div>
+      <h1>Book Club Attendance</h1>
+      <div class="subtitle">Session Management &amp; Participant Feedback</div>
+    </div>
+    <div class="session-controls">
+      <label>FILTER SESSION:</label>
+      <select id="sessionFilter" onchange="onFilterChange()"></select>
+      <button class="btn btn-primary" onclick="openCreateSession()">+ Add Session</button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card stat-confirmed"><div class="label">CONFIRMED</div><div class="value" id="statConfirmed">0</div></div>
+    <div class="stat-card stat-unable"><div class="label">UNABLE</div><div class="value" id="statUnable">0</div></div>
+    <div class="stat-card stat-notsure"><div class="label">NOT SURE</div><div class="value" id="statNotSure">0</div></div>
+    <div class="stat-card stat-total"><div class="label">TOTAL VOTES</div><div class="value" id="statTotal">0</div></div>
+  </div>
+
+  <div class="main-grid">
+    <div>
+      <div class="card">
+        <div class="card-title-row">
+          <div class="eyebrow">Currently Reading</div>
+          <button class="btn btn-secondary" onclick="toggleEditPanel()">✏️ Edit Details</button>
         </div>
-        <div class="nav-title">
-            <span class="live-dot"></span>
-            Librarian Console (Auto Sync)
+        <div class="book-title" id="bookTitleDisplay">Untitled Book</div>
+        <div class="book-author" id="bookAuthorDisplay">by Unknown Author</div>
+        <div class="meta-row">📅 <span id="sessionNameDisplay">Session —</span></div>
+        <div class="meta-row">🕒 <span id="sessionTimeDisplay">3:30 PM - 5:00 PM</span></div>
+        <div class="meta-row">📍 <span id="sessionLocationDisplay">CamTech University, lobby</span></div>
+
+        <div class="edit-panel" id="editPanel">
+          <label>Session</label>
+          <input type="text" id="editSession" disabled>
+          <label>Book Title</label>
+          <input type="text" id="editTitle" placeholder="Book title">
+          <label>Author</label>
+          <input type="text" id="editAuthor" placeholder="Author name">
+          <label>Time</label>
+          <input type="text" id="editTime" placeholder="3:30 PM - 5:00 PM">
+          <label>Location</label>
+          <input type="text" id="editLocation" placeholder="CamTech University, lobby">
+          <label>Total Pages</label>
+          <input type="number" id="editPages" placeholder="200">
+          <div class="checkbox-row">
+            <input type="checkbox" id="editBroadcast">
+            <label for="editBroadcast" style="font-weight:400;">Broadcast update to Telegram group poll</label>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:6px;">
+            <button class="btn btn-primary" onclick="saveSessionDetails()">Save &amp; Sync</button>
+            <button class="btn btn-secondary" onclick="toggleEditPanel()">Cancel</button>
+          </div>
         </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title-row"><div class="eyebrow">📖 Page Reading Splitter Tool</div></div>
+        <label style="font-size:12px; font-weight:600;">Total Book Pages:</label>
+        <input type="number" id="splitterPages" style="width:100%; margin-top:4px;" placeholder="200" oninput="updateSplitter()">
+        <label style="font-size:12px; font-weight:600; margin-top:10px; display:block;">Total Members Joining (Auto-linked to Confirmed):</label>
+        <input type="number" id="splitterMembers" style="width:100%; margin-top:4px;" disabled>
+        <div class="splitter-result" id="splitterResult">No confirmed members joining yet.</div>
+      </div>
     </div>
 
-    <div class="dashboard-container">
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>PARTICIPANT</th>
+            <th>SESSION</th>
+            <th>RESPONSE</th>
+            <th>CAN'T JOIN REASON</th>
+            <th>RATING</th>
+            <th>COMMENT</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody id="votesTableBody">
+          <tr class="empty-row"><td colspan="7">Loading votes...</td></tr>
+        </tbody>
+      </table>
 
-        <div id="setupNeededBanner" class="status-alert-banner banner-canceled" style="display:none;">
-            <span id="setupNeededText">⚠️ This week's session hasn't been set up yet.</span>
-            <button class="btn-add-session" style="background:#C62828;" onclick="openEditSessionModalForActive()">Set it up now</button>
+      <div class="toolbar-row">
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-primary" onclick="loadData()">Refresh Data</button>
+          <button class="btn btn-secondary" onclick="downloadCSV()">Download CSV</button>
+          <button class="btn btn-secondary" onclick="window.print()">Print Report</button>
         </div>
-
-        <div id="statusBanner" class="status-alert-banner banner-confirmed">
-            <span id="statusBannerText">Checking session status...</span>
-            <span id="statusPercentage" style="font-size: 12px; opacity: 0.8;"></span>
-        </div>
-
-        <div class="header-row">
-            <div>
-                <h1 class="page-title">Book Club Attendance</h1>
-                <div class="page-subtext">Session Management & Participant Feedback</div>
-            </div>
-
-            <div class="week-selector-card">
-                <label for="filterSession">Filter Session:</label>
-                <select id="filterSession" onchange="onSessionChange()">
-                    <option value="ALL">All Sessions</option>
-                </select>
-                <button class="btn-add-session" onclick="openAddSessionModal()">
-                    ➕ Add Session
-                </button>
-            </div>
-
-            <div class="metrics-grid">
-                <div class="metric-card confirmed">
-                    <div class="metric-label">Confirmed</div>
-                    <div class="metric-value" id="countAttend">0</div>
-                </div>
-                <div class="metric-card cant">
-                    <div class="metric-label">Unable</div>
-                    <div class="metric-value" id="countCant">0</div>
-                </div>
-                <div class="metric-card unsure">
-                    <div class="metric-label">Not Sure</div>
-                    <div class="metric-value" id="countUnsure">0</div>
-                </div>
-                <div class="metric-card no-response">
-                    <div class="metric-label">Total Votes</div>
-                    <div class="metric-value" id="countTotal">0</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="content-grid">
-            <div>
-                <div class="side-card">
-                    <div class="side-card-header">
-                        <div class="card-label">Currently Reading</div>
-                        <button class="btn-edit-side" onclick="openEditSessionModal()">✏️ Edit Details</button>
-                    </div>
-                    <div class="book-title" id="sideCardBookTitle">Loading book title...</div>
-                    <div class="book-author" id="sideCardBookAuthor">...</div>
-
-                    <div class="meta-item">📅 <span id="sideCardSession">Session --</span></div>
-                    <div class="meta-item">🕒 <span id="sideCardTime">3:30 PM - 5:00 PM</span></div>
-                    <div class="meta-item">📍 <span id="sideCardLocation">CamTech University, lobby</span></div>
-                </div>
-
-                <div class="side-card">
-                    <div class="card-label">📖 Page Reading Splitter Tool</div>
-                    <div class="tool-input-group">
-                        <label>Total Book Pages:</label>
-                        <input type="number" id="totalPages" value="200" oninput="calculatePages()">
-                        <label>Total Members Joining (Auto-linked to Confirmed):</label>
-                        <input type="number" id="totalMembers" value="0" oninput="calculatePages()">
-                    </div>
-                    <div class="calc-result" id="pageResult">
-                        Each member reads ~0 pages.
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <div class="table-card">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Participant</th>
-                                <th>Session</th>
-                                <th>Response</th>
-                                <th>Can't Join Reason</th>
-                                <th>Rating</th>
-                                <th>Comment</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="attendanceTable">
-                            <tr>
-                                <td colspan="7" style="text-align: center; color: #8C8275; padding: 24px;">
-                                    Loading session data...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="actions-footer">
-                    <div class="actions-footer-buttons">
-                        <button class="btn-action btn-primary" onclick="loadLiveVotes(false)">Refresh Data</button>
-                        <button class="btn-action btn-secondary" onclick="exportCSV()">Download CSV</button>
-                        <button class="btn-action btn-secondary" onclick="window.print()">Print Report</button>
-                    </div>
-                    <div id="syncStatus" style="font-size: 11px; color: #8C8275;">Auto-syncing active (every 10s)</div>
-                </div>
-            </div>
-        </div>
+        <div class="sync-note" id="syncNote">Not yet synced</div>
+      </div>
     </div>
-
-    <!-- EDIT ENTRY MODAL -->
-    <div class="modal-overlay" id="editModal">
-        <div class="modal-card">
-            <div class="modal-title">Edit Entry</div>
-            <input type="hidden" id="editRowIndex">
-            
-            <div class="modal-field">
-                <label>Participant Name</label>
-                <input type="text" id="editUser">
-            </div>
-            <div class="modal-field">
-                <label>Session</label>
-                <input type="text" id="editSession">
-            </div>
-            <div class="modal-field">
-                <label>Response Status</label>
-                <select id="editStatus">
-                    <option value="I'll Attend">I'll Attend</option>
-                    <option value="Can't Attend">Can't Attend</option>
-                    <option value="Not Sure Yet">Not Sure Yet</option>
-                </select>
-            </div>
-            <div class="modal-field">
-                <label>Can't Join Reason</label>
-                <input type="text" id="editReason">
-            </div>
-            <div class="modal-field">
-                <label>Rating</label>
-                <input type="text" id="editRating" placeholder="e.g. 5 ⭐">
-            </div>
-            <div class="modal-field">
-                <label>Comment</label>
-                <input type="text" id="editComment">
-            </div>
-
-            <div class="modal-actions">
-                <button class="btn-action btn-secondary" onclick="closeEditModal()">Cancel</button>
-                <button class="btn-action btn-primary" onclick="saveFullEdit()">Save Changes</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- CREATE / EDIT SESSION MODAL -->
-    <div class="modal-overlay" id="addSessionModal">
-        <div class="modal-card">
-            <div class="modal-title" id="sessionModalTitle">➕ Create New Book Session</div>
-            
-            <div class="modal-field">
-                <label>Session Name / Number</label>
-                <input type="text" id="newSessionName" placeholder="e.g. Session 12">
-            </div>
-            <div class="modal-field">
-                <label>Book Title</label>
-                <input type="text" id="newBookTitle" placeholder="e.g. The Library of Babel">
-            </div>
-            <div class="modal-field">
-                <label>Author Name</label>
-                <input type="text" id="newBookAuthor" placeholder="e.g. Jorge Luis Borges">
-            </div>
-            <div class="modal-field">
-                <label>Time & Schedule</label>
-                <input type="text" id="newSessionTime" value="3:30 PM - 5:00 PM">
-            </div>
-            <div class="modal-field">
-                <label>Location</label>
-                <input type="text" id="newSessionLocation" value="CamTech University, lobby">
-            </div>
-            <div class="modal-field-checkbox" id="telegramCheckboxContainer">
-                <input type="checkbox" id="broadcastTelegram" checked>
-                <label for="broadcastTelegram">Trigger Telegram Bot Announcement</label>
-            </div>
-
-            <div class="modal-actions">
-                <button class="btn-action btn-secondary" onclick="closeAddSessionModal()">Cancel</button>
-                <button class="btn-action btn-primary" onclick="saveSessionData()">Save Session</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2nvLYa1kNGijsg_XEqfW1lSdtsTUnOfBDrTkjL6GbyDsmPgKF2dI40rVu9ujQ9Xym/exec";
-        const AUTO_REFRESH_INTERVAL = 10000;
-        let allVotes = [];
-        let isEditingSessionMode = false;
-        let activeSessionFromBackend = "";
-
-        let sessionDetailsMap = JSON.parse(localStorage.getItem('camtech_session_details')) || {};
-
-        async function loadLiveVotes(isSilent = false) {
-            const editOpen = document.getElementById('editModal').style.display === 'flex';
-            const addOpen = document.getElementById('addSessionModal').style.display === 'flex';
-            if (isSilent && (editOpen || addOpen)) return;
-
-            const tableBody = document.getElementById('attendanceTable');
-            
-            if (!isSilent) {
-                tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #8C8275; padding: 24px;">Fetching live votes...</td></tr>`;
-            }
-
-            try {
-                const response = await fetch(SCRIPT_URL);
-                const data = await response.json();
-                allVotes = data.votes || (Array.isArray(data) ? data : []);
-                
-                // STEP 4 FIX: Sync dynamic session details live from Google Apps Script backend
-                if (data.details) {
-                    sessionDetailsMap = data.details;
-                    localStorage.setItem('camtech_session_details', JSON.stringify(sessionDetailsMap));
-                }
-                if (data.activeSession) {
-                    activeSessionFromBackend = data.activeSession;
-                }
-
-                const setupBanner = document.getElementById('setupNeededBanner');
-                if (data.activeNeedsSetup) {
-                    document.getElementById('setupNeededText').innerText =
-                        `⚠️ ${activeSessionFromBackend || 'This week\'s session'} hasn't been set up yet — members can't see a book title.`;
-                    setupBanner.style.display = 'flex';
-                } else {
-                    setupBanner.style.display = 'none';
-                }
-
-                updateDynamicSessionDropdown();
-                renderTable();
-                
-                const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                document.getElementById('syncStatus').innerText = `Auto-synced at ${now}`;
-            } catch (err) {
-                console.error("Dashboard sync error:", err);
-                if (!isSilent) {
-                    tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#C62828; padding:24px;">Error loading data. Click Refresh.</td></tr>`;
-                }
-            }
-        }
-
-        function extractSessionName(sessionStr) {
-            if (!sessionStr) return activeSessionFromBackend || "Session 11";
-            return sessionStr.split(" (")[0].trim();
-        }
-
-        function updateDynamicSessionDropdown() {
-            const select = document.getElementById('filterSession');
-            const currentValue = select.value;
-            
-            const sessions = new Set();
-            Object.keys(sessionDetailsMap).forEach(s => sessions.add(s));
-            
-            allVotes.forEach(vote => {
-                if (vote.session) {
-                    sessions.add(extractSessionName(vote.session));
-                }
-            });
-
-            let optionsHTML = `<option value="ALL">All Sessions</option>`;
-            Array.from(sessions).reverse().forEach(sess => {
-                optionsHTML += `<option value="${sess}">${sess}</option>`;
-            });
-
-            select.innerHTML = optionsHTML;
-            if (currentValue && select.querySelector(`option[value="${currentValue}"]`)) {
-                select.value = currentValue;
-            } else if (select.options.length > 1) {
-                select.value = activeSessionFromBackend && select.querySelector(`option[value="${activeSessionFromBackend}"]`)
-                    ? activeSessionFromBackend 
-                    : select.options[1].value;
-            }
-            updateSideCardBookInfo();
-        }
-
-        function onSessionChange() {
-            updateSideCardBookInfo();
-            renderTable();
-        }
-
-        // STEP 4 FIX: Dynamically populate book details without hardcoded fallbacks
-        function updateSideCardBookInfo() {
-            let selectedSession = document.getElementById('filterSession').value;
-            
-            if (selectedSession === "ALL") {
-                selectedSession = activeSessionFromBackend || (document.getElementById('filterSession').options[1]?.value);
-            }
-
-            const details = sessionDetailsMap[selectedSession] || sessionDetailsMap[activeSessionFromBackend];
-
-            if (details) {
-                document.getElementById('sideCardBookTitle').innerText = details.title || "No Title Set";
-                document.getElementById('sideCardBookAuthor').innerText = details.author || "";
-                document.getElementById('sideCardTime').innerText = details.time || "3:30 PM - 5:00 PM";
-                document.getElementById('sideCardLocation').innerText = details.location || "CamTech University, lobby";
-            } else {
-                document.getElementById('sideCardBookTitle').innerText = "No Session Selected";
-                document.getElementById('sideCardBookAuthor').innerText = "";
-                document.getElementById('sideCardTime').innerText = "—";
-                document.getElementById('sideCardLocation').innerText = "—";
-            }
-        }
-
-        function renderTable() {
-            const selectedSession = document.getElementById('filterSession').value;
-            const tableBody = document.getElementById('attendanceTable');
-            document.getElementById('sideCardSession').innerText = selectedSession === "ALL" ? "All Sessions" : selectedSession;
-
-            const filtered = selectedSession === "ALL" 
-                ? allVotes 
-                : allVotes.filter(item => extractSessionName(item.session) === selectedSession);
-
-            if (!filtered || filtered.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#8C8275; padding:24px;">No votes recorded for this session yet.</td></tr>`;
-                updateMetricsAndBanner(0, 0, 0, 0);
-                return;
-            }
-
-            tableBody.innerHTML = '';
-            let attend = 0, cant = 0, unsure = 0;
-
-            filtered.forEach(item => {
-                const user = item.user || 'Member';
-                const status = item.status || '—';
-                const session = extractSessionName(item.session);
-                const reason = item.reason || '—';
-                const rating = item.rating || '—';
-                const comment = item.comment || '—';
-
-                let badgeClass = 'badge-none';
-                if (status === "I'll Attend") {
-                    badgeClass = 'badge-attend';
-                    attend++;
-                } else if (status === "Can't Attend") {
-                    badgeClass = 'badge-cant';
-                    cant++;
-                } else if (status.includes("Not Sure")) {
-                    badgeClass = 'badge-unsure';
-                    unsure++;
-                }
-
-                tableBody.innerHTML += `
-                    <tr>
-                        <td><strong>${user}</strong></td>
-                        <td style="font-size: 11px; color: #70685C;">${session}</td>
-                        <td><span class="badge ${badgeClass}">${status}</span></td>
-                        <td style="font-size: 11px; color: #C62828;">${reason}</td>
-                        <td>${rating}</td>
-                        <td style="font-size: 11px; color: #555;">${comment}</td>
-                        <td>
-                            <div class="btn-btn-group">
-                                <button class="btn-edit" onclick="openEditModal(${item.rowIndex}, '${escapeHtml(user)}', '${escapeHtml(session)}', '${escapeHtml(status)}', '${escapeHtml(reason)}', '${escapeHtml(rating)}', '${escapeHtml(comment)}')">Edit</button>
-                                <button class="btn-delete" onclick="deleteVote(${item.rowIndex}, '${escapeHtml(user)}')">Delete</button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            updateMetricsAndBanner(attend, cant, unsure, filtered.length);
-        }
-
-        function escapeHtml(str) {
-            return (str || '').toString().replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        }
-
-        function updateMetricsAndBanner(attend, cant, unsure, total) {
-            document.getElementById('countAttend').innerText = attend;
-            document.getElementById('countCant').innerText = cant;
-            document.getElementById('countUnsure').innerText = unsure;
-            document.getElementById('countTotal').innerText = total;
-
-            document.getElementById('totalMembers').value = attend;
-            calculatePages();
-
-            const banner = document.getElementById('statusBanner');
-            const bannerText = document.getElementById('statusBannerText');
-            const statusPct = document.getElementById('statusPercentage');
-
-            if (total === 0) {
-                banner.className = "status-alert-banner banner-confirmed";
-                bannerText.innerText = "ℹ️ Session created. Waiting for votes.";
-                statusPct.innerText = "";
-                return;
-            }
-
-            const attendanceRate = (attend / total) * 100;
-            statusPct.innerText = `Attendance Rate: ${attendanceRate.toFixed(1)}% (${attend}/${total})`;
-
-            if (attendanceRate < 50) {
-                banner.className = "status-alert-banner banner-canceled";
-                bannerText.innerText = "🚨 MEETING CANCELED / POSTPONED: Attendance is currently below 50%.";
-            } else {
-                banner.className = "status-alert-banner banner-confirmed";
-                bannerText.innerText = "✅ MEETING CONFIRMED: Attendance requirement (>50%) is satisfied.";
-            }
-        }
-
-        function calculatePages() {
-            const pages = parseInt(document.getElementById('totalPages').value) || 0;
-            const members = parseInt(document.getElementById('totalMembers').value) || 0;
-            
-            if (members <= 0) {
-                document.getElementById('pageResult').innerText = `No confirmed members joining yet.`;
-                return;
-            }
-
-            const perMember = Math.ceil(pages / members);
-            document.getElementById('pageResult').innerText = `Each member reads ~${perMember} pages (${pages} pages ÷ ${members} joining members).`;
-        }
-
-        function openAddSessionModal() {
-            isEditingSessionMode = false;
-            document.getElementById('sessionModalTitle').innerText = "➕ Create New Book Session";
-            document.getElementById('newSessionName').disabled = false;
-
-            const existingNums = Object.keys(sessionDetailsMap).map(s => {
-                const num = parseInt(s.replace(/\D/g, ''));
-                return isNaN(num) ? 0 : num;
-            });
-            const nextNum = (Math.max(...existingNums, 11)) + 1;
-            
-            document.getElementById('newSessionName').value = `Session ${nextNum}`;
-            document.getElementById('newBookTitle').value = "";
-            document.getElementById('newBookAuthor').value = "";
-            document.getElementById('newSessionTime').value = "3:30 PM - 5:00 PM";
-            document.getElementById('newSessionLocation').value = "CamTech University, lobby";
-            document.getElementById('telegramCheckboxContainer').style.display = "flex";
-
-            document.getElementById('addSessionModal').style.display = 'flex';
-        }
-
-        function openEditSessionModalForActive() {
-            const select = document.getElementById('filterSession');
-            if (activeSessionFromBackend && select.querySelector(`option[value="${activeSessionFromBackend}"]`)) {
-                select.value = activeSessionFromBackend;
-                onSessionChange();
-            }
-            openEditSessionModal();
-        }
-
-        function openEditSessionModal() {
-            const select = document.getElementById('filterSession');
-            let selectedSession = select.value;
-
-            if (selectedSession === "ALL") {
-                if (select.options.length > 1) {
-                    selectedSession = select.options[1].value;
-                    select.value = selectedSession;
-                    onSessionChange();
-                } else {
-                    alert("No session found to edit.");
-                    return;
-                }
-            }
-
-            isEditingSessionMode = true;
-            document.getElementById('sessionModalTitle').innerText = `✏️ Edit ${selectedSession} Details`;
-            document.getElementById('newSessionName').value = selectedSession;
-            document.getElementById('newSessionName').disabled = true;
-
-            const details = sessionDetailsMap[selectedSession] || {};
-
-            let cleanTitle = (details.title || '').replace(/^"(.*)"$/, '$1');
-            let cleanAuthor = (details.author || '').replace(/^by\s+/i, '');
-
-            document.getElementById('newBookTitle').value = cleanTitle;
-            document.getElementById('newBookAuthor').value = cleanAuthor;
-            document.getElementById('newSessionTime').value = details.time || "3:30 PM - 5:00 PM";
-            document.getElementById('newSessionLocation').value = details.location || "CamTech University, lobby";
-            document.getElementById('telegramCheckboxContainer').style.display = "none";
-
-            document.getElementById('addSessionModal').style.display = 'flex';
-        }
-
-        function closeAddSessionModal() {
-            document.getElementById('addSessionModal').style.display = 'none';
-        }
-
-        async function saveSessionData() {
-            const sessionName = document.getElementById('newSessionName').value.trim();
-            const bookTitle = document.getElementById('newBookTitle').value.trim() || "Untitled Book";
-            const bookAuthor = document.getElementById('newBookAuthor').value.trim() || "Unknown Author";
-            const sessionTime = document.getElementById('newSessionTime').value.trim();
-            const sessionLocation = document.getElementById('newSessionLocation').value.trim();
-            const sendTelegram = document.getElementById('broadcastTelegram').checked;
-
-            if (!sessionName) {
-                alert("Please specify a session name.");
-                return;
-            }
-
-            sessionDetailsMap[sessionName] = {
-                title: `${bookTitle}`,
-                author: `by ${bookAuthor}`,
-                time: sessionTime,
-                location: sessionLocation
-            };
-
-            localStorage.setItem('camtech_session_details', JSON.stringify(sessionDetailsMap));
-
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'updateSessionDetails',
-                    session: sessionName,
-                    title: `${bookTitle}`,
-                    author: `by ${bookAuthor}`,
-                    time: sessionTime,
-                    location: sessionLocation,
-                    broadcastTelegram: sendTelegram
-                })
-            });
-
-            closeAddSessionModal();
-            updateDynamicSessionDropdown();
-
-            const select = document.getElementById('filterSession');
-            select.value = sessionName;
-            onSessionChange();
-
-            alert(isEditingSessionMode ? `✅ ${sessionName} details updated!` : `✅ ${sessionName} created!`);
-        }
-
-        function openEditModal(rowIndex, user, session, status, reason, rating, comment) {
-            document.getElementById('editRowIndex').value = rowIndex;
-            document.getElementById('editUser').value = user;
-            document.getElementById('editSession').value = session;
-            document.getElementById('editStatus').value = status;
-            document.getElementById('editReason').value = reason === '—' ? '' : reason;
-            document.getElementById('editRating').value = rating === '—' ? '' : rating;
-            document.getElementById('editComment').value = comment === '—' ? '' : comment;
-
-            document.getElementById('editModal').style.display = 'flex';
-        }
-
-        function closeEditModal() {
-            document.getElementById('editModal').style.display = 'none';
-        }
-
-        async function saveFullEdit() {
-            const payload = {
-                action: 'edit',
-                rowIndex: parseInt(document.getElementById('editRowIndex').value),
-                user: document.getElementById('editUser').value,
-                session: document.getElementById('editSession').value,
-                status: document.getElementById('editStatus').value,
-                reason: document.getElementById('editReason').value,
-                rating: document.getElementById('editRating').value,
-                comment: document.getElementById('editComment').value
-            };
-
-            closeEditModal();
-
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            alert(`Record updated for ${payload.user}. Refreshing...`);
-            setTimeout(() => loadLiveVotes(false), 1000);
-        }
-
-        async function deleteVote(rowIndex, userName) {
-            if (confirm(`Delete record for ${userName}?`)) {
-                fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'delete', rowIndex: rowIndex })
-                });
-
-                alert(`Deleted ${userName}. Refreshing...`);
-                setTimeout(() => loadLiveVotes(false), 1000);
-            }
-        }
-
-        function exportCSV() {
-            let csv = 'Participant,Session,Response,Reason,Rating,Comment\n';
-            const rows = document.querySelectorAll("#attendanceTable tr");
-            
-            rows.forEach(row => {
-                const cols = row.querySelectorAll("td");
-                if (cols.length > 1) {
-                    const rowData = [cols[0], cols[1], cols[2], cols[3], cols[4], cols[5]].map(c => `"${c.innerText.trim()}"`).join(",");
-                    csv += rowData + "\n";
-                }
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('href', url);
-            a.setAttribute('download', 'CamTech_BookClub_Report.csv');
-            a.click();
-        }
-
-        loadLiveVotes(false);
-
-        setInterval(() => {
-            loadLiveVotes(true);
-        }, AUTO_REFRESH_INTERVAL);
-    </script>
+  </div>
+</div>
+
+<script>
+// Same Apps Script deployment URL used by index.html — single source of truth
+// for the active session, book details, and every recorded vote.
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyiiHQS1n7EkTep6OXYWA2aPEZBsb2pAuxty8El4RmzZPkt2sbNkASw4H3Buep6BjQL/exec";
+
+let latestData = null;
+let currentFilterSession = null;
+
+window.addEventListener('DOMContentLoaded', () => {
+  loadData();
+  // Keep the dashboard fresh automatically, in case votes come in from Telegram/web app
+  setInterval(loadData, 30000);
+});
+
+async function loadData() {
+  try {
+    const res = await fetch(`${SCRIPT_URL}?action=getDetails`);
+    const data = await res.json();
+    latestData = data;
+
+    if (!currentFilterSession) currentFilterSession = data.activeSession;
+
+    populateSessionFilter(data);
+    renderSessionCard(data);
+    renderVotesTable(data);
+    updateStats(data);
+
+    document.getElementById('banner').style.display = 'none';
+    document.getElementById('syncNote').innerText = `Auto-synced at ${new Date().toLocaleTimeString()}`;
+  } catch (err) {
+    const banner = document.getElementById('banner');
+    banner.className = 'banner error';
+    banner.innerText = 'Could not reach the backend. Check the Apps Script deployment URL and permissions.';
+    banner.style.display = 'block';
+    console.error(err);
+  }
+}
+
+function populateSessionFilter(data) {
+  const select = document.getElementById('sessionFilter');
+  const sessions = new Set(Object.keys(data.details || {}));
+  sessions.add(data.activeSession);
+  if (data.nextSession) sessions.add(data.nextSession);
+  (data.votes || []).forEach(v => sessions.add(v.session));
+
+  const sorted = Array.from(sessions).sort((a, b) => {
+    const na = parseInt(a.replace(/\D/g, '')) || 0;
+    const nb = parseInt(b.replace(/\D/g, '')) || 0;
+    return nb - na;
+  });
+
+  select.innerHTML = '';
+  sorted.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s;
+    opt.innerText = s === data.activeSession ? `${s} (Current Active)` : s;
+    select.appendChild(opt);
+  });
+  select.value = currentFilterSession;
+}
+
+function onFilterChange() {
+  currentFilterSession = document.getElementById('sessionFilter').value;
+  renderSessionCard(latestData);
+  renderVotesTable(latestData);
+  updateStats(latestData);
+}
+
+function renderSessionCard(data) {
+  const details = (data.details && data.details[currentFilterSession]) || {
+    title: "No Title Set", author: "", time: "3:30 PM - 5:00 PM", location: "CamTech University, lobby", pages: 0
+  };
+
+  document.getElementById('bookTitleDisplay').innerText = details.title || "Untitled Book";
+  document.getElementById('bookAuthorDisplay').innerText = details.author ? `by ${details.author}` : "by Unknown Author";
+  document.getElementById('sessionNameDisplay').innerText = currentFilterSession;
+  document.getElementById('sessionTimeDisplay').innerText = details.time || "3:30 PM - 5:00 PM";
+  document.getElementById('sessionLocationDisplay').innerText = details.location || "CamTech University, lobby";
+
+  // Pre-fill the edit panel too, so opening it never shows stale data
+  document.getElementById('editSession').value = currentFilterSession;
+  document.getElementById('editTitle').value = details.title === "No Title Set" ? "" : (details.title || "");
+  document.getElementById('editAuthor').value = details.author || "";
+  document.getElementById('editTime').value = details.time || "3:30 PM - 5:00 PM";
+  document.getElementById('editLocation').value = details.location || "CamTech University, lobby";
+  document.getElementById('editPages').value = details.pages || '';
+
+  document.getElementById('splitterPages').value = details.pages || '';
+}
+
+function renderVotesTable(data) {
+  const tbody = document.getElementById('votesTableBody');
+  const votes = (data.votes || []).filter(v => v.session === currentFilterSession);
+
+  if (votes.length === 0) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="7">No votes recorded for this session yet.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = votes.map(v => `
+    <tr>
+      <td>${escapeHtml(v.user)}</td>
+      <td>${escapeHtml(v.session)}</td>
+      <td>${statusBadge(v.status)}</td>
+      <td>${escapeHtml(v.reason)}</td>
+      <td>${escapeHtml(v.rating)}</td>
+      <td>${escapeHtml(v.comment)}</td>
+      <td class="actions-cell">
+        <button class="icon-btn" title="Delete" onclick="deleteVote(${v.rowIndex})">🗑️</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function statusBadge(status) {
+  if (status === "I'll Attend") return `<span class="badge badge-attend">I'll Attend</span>`;
+  if (status === "Can't Attend") return `<span class="badge badge-cant">Can't Attend</span>`;
+  return `<span class="badge badge-unsure">Not Sure Yet</span>`;
+}
+
+function updateStats(data) {
+  const votes = (data.votes || []).filter(v => v.session === currentFilterSession);
+  const confirmed = votes.filter(v => v.status === "I'll Attend").length;
+  const unable = votes.filter(v => v.status === "Can't Attend").length;
+  const notSure = votes.filter(v => v.status === "Not Sure Yet").length;
+
+  document.getElementById('statConfirmed').innerText = confirmed;
+  document.getElementById('statUnable').innerText = unable;
+  document.getElementById('statNotSure').innerText = notSure;
+  document.getElementById('statTotal').innerText = votes.length;
+
+  document.getElementById('splitterMembers').value = confirmed;
+  updateSplitter();
+}
+
+function updateSplitter() {
+  const pages = parseInt(document.getElementById('splitterPages').value) || 0;
+  const members = parseInt(document.getElementById('splitterMembers').value) || 0;
+  const result = document.getElementById('splitterResult');
+
+  if (members === 0) {
+    result.innerText = "No confirmed members joining yet.";
+    return;
+  }
+  if (pages === 0) {
+    result.innerText = "Enter total pages to calculate the split.";
+    return;
+  }
+  const perPerson = Math.ceil(pages / members);
+  result.innerText = `Each of the ${members} confirmed member(s) reads about ${perPerson} pages.`;
+}
+
+function toggleEditPanel() {
+  document.getElementById('editPanel').classList.toggle('open');
+}
+
+async function saveSessionDetails() {
+  const payload = {
+    action: 'updateSessionDetails',
+    session: document.getElementById('editSession').value,
+    title: document.getElementById('editTitle').value.trim() || "No Title Set",
+    author: document.getElementById('editAuthor').value.trim(),
+    time: document.getElementById('editTime').value.trim() || "3:30 PM - 5:00 PM",
+    location: document.getElementById('editLocation').value.trim() || "CamTech University, lobby",
+    pages: parseInt(document.getElementById('editPages').value) || 0,
+    broadcastTelegram: document.getElementById('editBroadcast').checked
+  };
+
+  const banner = document.getElementById('banner');
+  banner.className = 'banner';
+  banner.innerText = 'Saving...';
+  banner.style.display = 'block';
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    banner.innerText = payload.broadcastTelegram
+      ? 'Session details saved and broadcast to Telegram poll.'
+      : 'Session details saved. Poll and web app will show this on next load.';
+    toggleEditPanel();
+    setTimeout(loadData, 800);
+  } catch (err) {
+    banner.className = 'banner error';
+    banner.innerText = 'Save failed. Check your connection.';
+  }
+}
+
+function openCreateSession() {
+  const num = prompt("Enter the session number to create (e.g. 13):");
+  if (!num) return;
+  currentFilterSession = `Session ${num.trim()}`;
+  document.getElementById('editSession').value = currentFilterSession;
+  document.getElementById('editTitle').value = '';
+  document.getElementById('editAuthor').value = '';
+  document.getElementById('editTime').value = '3:30 PM - 5:00 PM';
+  document.getElementById('editLocation').value = 'CamTech University, lobby';
+  document.getElementById('editPages').value = '';
+  document.getElementById('editPanel').classList.add('open');
+
+  const banner = document.getElementById('banner');
+  banner.className = 'banner';
+  banner.innerText = `Ready to create ${currentFilterSession}. Fill in the details on the left and click "Save & Sync".`;
+  banner.style.display = 'block';
+}
+
+async function deleteVote(rowIndex) {
+  if (!confirm('Delete this vote entry? This cannot be undone.')) return;
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', rowIndex })
+    });
+    setTimeout(loadData, 800);
+  } catch (err) {
+    alert('Delete failed. Check your connection.');
+  }
+}
+
+function downloadCSV() {
+  const votes = (latestData.votes || []).filter(v => v.session === currentFilterSession);
+  if (votes.length === 0) { alert('No votes to export for this session.'); return; }
+
+  const headers = ['Timestamp', 'User', 'Status', 'Session', 'Reason', 'Rating', 'Comment'];
+  const rows = votes.map(v => [v.timestamp, v.user, v.status, v.session, v.reason, v.rating, v.comment]);
+  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${currentFilterSession.replace(/\s+/g, '_')}_votes.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function escapeHtml(str) {
+  if (str === undefined || str === null) return '—';
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+</script>
 </body>
 </html>
