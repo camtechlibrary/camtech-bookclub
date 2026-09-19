@@ -529,7 +529,14 @@
 
         function extractSessionName(sessionStr) {
             if (!sessionStr) return activeSessionFromBackend || "Session 11";
-            return sessionStr.split(" (")[0].trim();
+            const cleaned = sessionStr.split(" (")[0].trim();
+            // Guard: reject anything that isn't actually "Session N" — this is what
+            // stops a stray name (e.g. typed in the wrong field) from ever being
+            // treated as a real session.
+            if (!/^Session\s+\d+$/i.test(cleaned)) {
+                return activeSessionFromBackend || "Session 11";
+            }
+            return cleaned;
         }
 
         function updateDynamicSessionDropdown() {
@@ -537,16 +544,26 @@
             const currentValue = select.value;
             
             const sessions = new Set();
-            Object.keys(sessionDetailsMap).forEach(s => sessions.add(s));
+            Object.keys(sessionDetailsMap).forEach(s => {
+                if (/^Session\s+\d+$/i.test(s)) sessions.add(s);
+            });
             
             allVotes.forEach(vote => {
                 if (vote.session) {
-                    sessions.add(extractSessionName(vote.session));
+                    const name = extractSessionName(vote.session);
+                    if (/^Session\s+\d+$/i.test(name)) sessions.add(name);
                 }
             });
 
+            // Sort strictly by session number, descending (highest first: 15, 14, 13, 12, 11...)
+            const sortedSessions = Array.from(sessions).sort((a, b) => {
+                const na = parseInt(a.replace(/\D/g, '')) || 0;
+                const nb = parseInt(b.replace(/\D/g, '')) || 0;
+                return nb - na;
+            });
+
             let optionsHTML = `<option value="ALL">All Sessions</option>`;
-            Array.from(sessions).reverse().forEach(sess => {
+            sortedSessions.forEach(sess => {
                 optionsHTML += `<option value="${sess}">${sess}</option>`;
             });
 
